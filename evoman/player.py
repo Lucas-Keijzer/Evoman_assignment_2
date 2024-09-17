@@ -290,7 +290,7 @@ class Player(pygame.sprite.Sprite):
         if game.joy > 0:
             if int(joystick.get_button(2)) == 1 and press == 1:
                 jump = 1
-        if key[pygame.K_SPACE] and press == 1:
+        if key[pygame.K_SPACE]: #and press == 1:
             jump = 1
         # gets joystick/key value for shooting
         shoot = 0
