@@ -56,7 +56,8 @@ env = environm(experiment_name=experiment_name,
 			   player_controller=player_controller(n_hidden_neurons),
 			   enemy_controller=enemy_controller(n_hidden_neurons),
 			   level=2,
-			   speed="fastest")
+			   speed="fastest",
+			   visuals=True)
 
 
 env.state_to_log() # checks environment state
