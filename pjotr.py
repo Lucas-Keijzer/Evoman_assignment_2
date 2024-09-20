@@ -5,7 +5,7 @@
 # karine.smiras@gmail.com     				                                  #
 ###############################################################################
 
-# added for testing
+# second change
 
 # imports framework
 import sys
