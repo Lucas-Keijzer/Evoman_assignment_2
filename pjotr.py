@@ -26,11 +26,12 @@ class environm(Environment):
 
     def fitness_single(self):
 
-        time_score = -np.log(self.get_time)
+        time_score = 0
 
-        # ensures slower solutions are worse when the player wins
         if self.get_playerlife() <= 0:
-            time_score = abs(time_score)
+            time_score = np.log(self.get_time)
+        else:
+            time_score = -np.log(self.get_time)
 
         return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score
 
@@ -57,10 +58,8 @@ tournament_size = 5         # tournament size
 
 crossover_rate = 0.7        # rate of crossover
 alpha = 0.5                 # distance from p1 and p2 in blend crossover
-mutation_rate = 0.1         # rate of mutation
-mutation_std = 0.1          # used in gaussian additive mutation
-
-last_best = 0
+mutation_rate = 0.3       # rate of mutation
+mutation_std = 0.5          # used in gaussian additive mutation
 
 
 # Apply clamping to each gene in the individual
@@ -105,8 +104,7 @@ def crossover_single(parent1, parent2):
 # mutates one individual based on gaussian additive mutation method
 def mutate_individual(individual):
     for i in range(len(individual)):
-        if np.random.uniform(0, 1) < mutation_rate:
-            individual[i] += np.random.normal(0, mutation_std)
+        individual[i] += np.random.normal(0, mutation_std)
 
     return clamp(individual)
 
@@ -138,6 +136,9 @@ def main():
 
     population = initialize_population()
 
+    best_solution = []
+    best_solution_fitness = 0
+
     # go for set amount of generations
     for generation in range(no_generations):
         fitness_population = evaluate_population(env, population)
@@ -153,24 +154,34 @@ def main():
             # Perform crossover to produce offspring (iucludes mutation)
             offspring = crossover_single(p1, p2)
 
-            # mutation
-            offspring = mutate_individual(offspring)
-
             # Add offspring to the next generation
             next_generation.append(offspring)
+
+        for i in range(len(population)):
+            if np.random.uniform(0, 1) < mutation_rate:
+                population[i] = mutate_individual(population[i])
 
         # Replace the old population with the new one
         population = np.array(next_generation)[:population_size]
 
         # Optional: Log the best fitness for monitoring
-        best_fitness = np.max(fitness_population)
-        print(f"Generation {generation + 1}/{no_generations}, Best Fitness: {best_fitness}")
+        generation_best_fitness = np.max(fitness_population)
+        if generation_best_fitness > best_solution_fitness:
+            best_solution = population[np.argmax(fitness_population)]
+            best_solution_fitness = generation_best_fitness
+        print(f"{generation + 1}/{no_generations}, max: {generation_best_fitness}, mean: {np.mean(fitness_population)}, std: {np.std(fitness_population)}")
+        # print(fitness_population)
 
     # Final evaluation and results
-    final_fitness = evaluate_population(env, population)  # Evaluate final population
-    best_solution = population[np.argmax(final_fitness)]
-    print("Best Solution:", best_solution)
-    print("Best Fitness:", np.max(final_fitness))
+    fitness_population = evaluate_population(env, population)  # Evaluate final population
+    generation_best_fitness = np.max(fitness_population)
+    if generation_best_fitness > best_solution_fitness:
+        best_solution = population[np.argmax(fitness_population)]
+        best_solution_fitness = generation_best_fitness
+
+    # print("Best Solution:", best_solution)
+    print(f"{generation + 1}/{no_generations}, max: {best_solution_fitness}, mean: {np.mean(fitness_population)}, std: {np.std(fitness_population)}")
+    print("Best Fitness:", best_solution_fitness)
 
     # Save the weights to a file
     np.save('pjotr_weights.npy', best_solution)

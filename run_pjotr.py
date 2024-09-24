@@ -25,7 +25,7 @@ def main():
     env = Environment(experiment_name=experiment_name,
                       playermode="ai",
                       player_controller=player_controller(n_hidden_neurons),
-                      speed="fastest",
+                      speed="normal",
                       enemymode="static",
                       level=2,
                       visuals=True)
@@ -33,7 +33,7 @@ def main():
     total_gain = 0  # Initialize total gain
 
     # Tests saved demo solutions for each enemy
-    for en in range(1, 9):
+    for en in range(7, 8):
         # Update the enemy
         env.update_parameter('enemies', [en])
 
