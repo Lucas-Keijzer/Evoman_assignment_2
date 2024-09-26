@@ -5,8 +5,6 @@
 # karine.smiras@gmail.com     				                                  #
 ###############################################################################
 
-# third change
-
 # imports framework
 import sys
 
@@ -29,9 +27,9 @@ class environm(Environment):
         time_score = 0
 
         if self.get_playerlife() <= 0:
-            time_score = np.log(self.get_time)
+            time_score = np.log(self.get_time())
         else:
-            time_score = -np.log(self.get_time)
+            time_score = -np.log(self.get_time())
 
         return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score
 

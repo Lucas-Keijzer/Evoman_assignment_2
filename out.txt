@@ -1,9 +1,0 @@
-pygame 2.5.2 (SDL 2.28.2, Python 3.9.18)
-Hello from the pygame community. https://www.pygame.org/contribute.html
-
-MESSAGE: Pygame initialized for simulation.
-265
-1/2, max: 87.33289246928256, mean: 9.559081172167007, std: 28.02735781767613
-2/2, max: 87.57289246928256, mean: 33.360482148287325, std: 36.017609725692566
-2/2, max: 89.05669509194095, mean: 46.37301384887106, std: 34.318458224227776
-Best Fitness: 89.05669509194095
