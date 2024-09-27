@@ -58,6 +58,9 @@ class EA:
         self.sigma_share = 0.1 * np.sqrt(self.n_vars)
         self.fitness_alpha = 5
 
+        # Load the best solution (if available) and its fitness
+        self.best_solution, self.best_solution_fitness = self.load_best_solution()
+
         # Initialize list to store fitness statistics and variety per generation
         self.fitness_stats = []
 
@@ -177,6 +180,26 @@ class EA:
 
         print(f"Fitness statistics saved to {csv_filename}")
 
+    # Load the best solution weights from a file
+    def load_best_solution(self):
+        filename = "best_solution_weights.npz"
+        if os.path.exists(filename):
+            data = np.load(filename)
+            best_solution = data['weights']
+            best_solution_fitness = data['fitness']
+            print(f"Loaded best solution with fitness: {best_solution_fitness}")
+            return best_solution, best_solution_fitness
+        else:
+            # No solution saved yet, initialize with an empty solution and very bad fitness
+            return None, float('-inf')
+
+    # Save the best solution weights to a file
+    def save_best_solution(self, best_solution, best_solution_fitness):
+        filename = "best_solution_weights.npz"
+        np.savez(filename, weights=best_solution, fitness=best_solution_fitness)
+        print(f"Best solution saved with fitness: {best_solution_fitness}")
+
+
     # The main evolutionary algorithm loop is now inside the run method
     def run(self):
         best_solution = None
@@ -216,21 +239,23 @@ class EA:
             self.store_fitness_stats(generation + 1, generation_max_fitness, generation_mean_fitness, generation_std_fitness, generation_variety)
 
             # Log the best fitness for monitoring
-            if generation_max_fitness > best_solution_fitness:
-                best_solution = self.population[np.argmax(fitness_population)]
-                best_solution_fitness = generation_max_fitness
+            if generation_max_fitness > self.best_solution_fitness:
+                self.best_solution = self.population[np.argmax(fitness_population)]
+                self.best_solution_fitness = generation_max_fitness
+                self.save_best_solution(self.best_solution, self.best_solution_fitness)
 
             print(f"{generation + 1}/{self.no_generations}, max: {generation_max_fitness}, mean: {generation_mean_fitness}, std: {generation_std_fitness}, variety: {generation_variety}")
 
         # Final evaluation and results
         fitness_population = self.evaluate_population()  # Evaluate final population
         generation_max_fitness = np.max(fitness_population)
-        if generation_max_fitness > best_solution_fitness:
-            best_solution = self.population[np.argmax(fitness_population)]
-            best_solution_fitness = generation_max_fitness
+        if generation_max_fitness > self.best_solution_fitness:
+            self.best_solution = self.population[np.argmax(fitness_population)]
+            self.best_solution_fitness = generation_max_fitness
+            self.save_best_solution(self.best_solution, self.best_solution_fitness)
 
         print(f"Final Generation: max: {best_solution_fitness}, mean: {np.mean(fitness_population)}, std: {np.std(fitness_population)}, variety: {self.calculate_variety()}")
-        print("Best Fitness:", best_solution_fitness)
+        print("Best Fitness:", self.best_solution_fitness)
 
         # Save the best solution weights to a file
         np.save('best_solution_weights.npy', best_solution)
