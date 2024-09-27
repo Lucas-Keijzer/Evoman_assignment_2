@@ -58,6 +58,9 @@ class EA:
         self.sigma_share = 0.1 * np.sqrt(self.n_vars)
         self.fitness_alpha = 5
 
+        # Load the best solution (if available) and its fitness
+        self.best_solution, self.best_solution_fitness = self.load_best_solution()
+
         # Initialize list to store fitness statistics and variety per generation
         self.fitness_stats = []
 
@@ -151,6 +154,32 @@ class EA:
 
         print(f"Fitness statistics saved to {csv_filename}")
 
+    # Load the best solution from a file
+    def load_best_solution(self):
+        ea = "EA2"
+        directory = f"best_solutions/{ea}/{self.enemy}/"
+        filename = f"{directory}solution_with_fitness.npz"
+
+        if os.path.exists(filename):
+            data = np.load(filename)
+            best_solution = data['weights']
+            best_solution_fitness = data['fitness']
+            print(f"Loaded best solution with fitness: {best_solution_fitness} from {filename}")
+            return best_solution, best_solution_fitness
+        else:
+            # No solution saved yet, initialize with an empty solution and very bad fitness
+            return None, float('-inf')
+
+    # Save the best solution to a file
+    def save_best_solution(self, best_solution, best_solution_fitness):
+        ea = "EA2"
+        directory = f"best_solutions/{ea}/{self.enemy}/"
+        os.makedirs(directory, exist_ok=True)
+        filename = f"{directory}solution_with_fitness.npz"
+
+        np.savez(filename, weights=best_solution, fitness=best_solution_fitness)
+        print(f"Best solution saved with fitness: {best_solution_fitness} to {filename}")
+
     # The main evolutionary algorithm loop is now inside the run method
     def run(self):
         best_solution = None
@@ -164,7 +193,7 @@ class EA:
 
             # Create a new generation with deterministic crowding
             next_generation = np.copy(self.population)
-            
+
             # Randomly pair parents
             parent_pairs = np.random.permutation(self.population_size).reshape(-1, 2)
 
@@ -217,9 +246,10 @@ class EA:
 
             # Log the best fitness for monitoring
             generation_best_fitness = np.max(fitness_population)
-            if generation_best_fitness > best_solution_fitness:
-                best_solution = self.population[np.argmax(fitness_population)]
-                best_solution_fitness = generation_best_fitness
+            if generation_max_fitness > self.best_solution_fitness:
+                self.best_solution = self.population[np.argmax(fitness_population)]
+                self.best_solution_fitness = generation_max_fitness
+                self.save_best_solution(self.best_solution, self.best_solution_fitness)
             # print(f"{generation + 1}/{self.no_generations}, max: {generation_best_fitness}, mean: {np.mean(fitness_population)}, std: {np.std(fitness_population)}")
             # diversity = calculate_diversity(population)
             # print(f"Generation {generation + 1}: Diversity = {diversity}")
@@ -229,9 +259,10 @@ class EA:
         # Final evaluation and results
         fitness_population = self.evaluate_population()  # Evaluate final population
         generation_max_fitness = np.max(fitness_population)
-        if generation_max_fitness > best_solution_fitness:
-            best_solution = self.population[np.argmax(fitness_population)]
-            best_solution_fitness = generation_max_fitness
+        if generation_max_fitness > self.best_solution_fitness:
+            self.best_solution = self.population[np.argmax(fitness_population)]
+            self.best_solution_fitness = generation_max_fitness
+            self.save_best_solution(self.best_solution, self.best_solution_fitness)
 
         print(f"Final Generation: max: {best_solution_fitness}, mean: {np.mean(fitness_population)}, std: {np.std(fitness_population)}, variety: {self.calculate_variety()}")
         print("Best Fitness:", best_solution_fitness)
