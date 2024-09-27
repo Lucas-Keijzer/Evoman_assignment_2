@@ -7,294 +7,269 @@
 
 # imports framework
 import sys
-
+import time
+import csv
 from evoman.environment import Environment
 from demo_controller import player_controller
 
 # imports other libs
-import time
 import numpy as np
-from math import fabs,sqrt
-import glob, os
+import os
+
+# standard offensive strategy first
+gamma = 0.9
+beta = 0.1
+
+# Custom environment class to change the fitness function
+class CustomEnvironment(Environment):
+    def fitness_single(self):
+        time_score = 0
+
+        if self.get_playerlife() <= 0:
+            time_score = np.log(self.get_time())
+        else:
+            time_score = -np.log(self.get_time())
+
+        return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score
 
 
-# choose this for not using visuals and thus making experiments faster
-headless = True
-if headless:
-    os.environ["SDL_VIDEODRIVER"] = "dummy"
+# EA class for running the evolutionary algorithm
+class EA:
+    def __init__(self, population_size, n_vars, upper_bound, lower_bound, crossover_rate, mutation_rate, mutation_std, tournament_size, alpha, env, no_generations, enemy):
+        self.population_size = population_size
+        self.n_vars = n_vars
+        self.upper_bound = upper_bound
+        self.lower_bound = lower_bound
+        self.crossover_rate = crossover_rate
+        self.mutation_rate = mutation_rate
+        self.mutation_std = mutation_std
+        self.tournament_size = tournament_size
+        self.alpha = alpha
+        self.no_generations = no_generations
+        self.enemy = enemy  # Add the enemy parameter
 
+        # Update environment with the specified enemy
+        self.env = env
+        self.env.update_parameter('enemies', [self.enemy])
 
-experiment_name = 'optimization_test'
-if not os.path.exists(experiment_name):
-    os.makedirs(experiment_name)
+        self.population = self.initialize_population()
 
-n_hidden_neurons = 10
+        # hardcoded for now
+        self.sigma_share = 0.1 * np.sqrt(self.n_vars)
+        self.fitness_alpha = 5
 
+        # Initialize list to store fitness statistics and variety per generation
+        self.fitness_stats = []
 
+        # Ensure the data folder exists to store CSV files
+        if not os.path.exists("testdata"):
+            os.makedirs("testdata")
 
-# initializes simulation in individual evolution mode, for single static enemy.
-env = Environment(experiment_name=experiment_name,
-                  enemies=[8],
-                  playermode="ai",
-                  player_controller=player_controller(n_hidden_neurons),
-                  enemymode="static",
-                  level=2,
-                  speed="fastest",
-                  visuals=False)
+    def initialize_population(self):
+        return np.random.uniform(self.lower_bound, self.upper_bound, (self.population_size, self.n_vars))
 
-# default environment fitness is assumed for experiment
+    def clamp(self, individual):
+        return np.clip(individual, self.lower_bound, self.upper_bound)
 
-env.state_to_log() # checks environment state
+    def tournament_selection(self, fitness_population):
+        selected_indices = np.random.randint(0, self.population.shape[0], self.tournament_size)
+        selected_fitness = fitness_population[selected_indices]
+        best_index = np.argmax(selected_fitness)
+        return self.population[selected_indices[best_index]]
 
+    def crossover_single(self, parent1, parent2):
+        offspring = np.zeros_like(parent1)
 
-####   Optimization for controller solution (best genotype-weights for phenotype-network): Ganetic Algorihm    ###
-
-ini = time.time()  # sets time marker
-
-
-# genetic algorithm params
-
-run_mode = 'train' # train or test
-
-# number of weights for multilayer with 10 hidden neurons
-n_vars = (env.get_num_sensors()+1)*n_hidden_neurons + (n_hidden_neurons+1)*5
-
-
-dom_u = 1
-dom_l = -1
-npop = 100
-gens = 30
-mutation = 0.2
-last_best = 0
-
-
-# runs simulation
-def simulation(env,x):
-    f,p,e,t = env.play(pcont=x)
-    return f
-
-# normalizes
-def norm(x, pfit_pop):
-
-    if ( max(pfit_pop) - min(pfit_pop) ) > 0:
-        x_norm = ( x - min(pfit_pop) )/( max(pfit_pop) - min(pfit_pop) )
-    else:
-        x_norm = 0
-
-    if x_norm <= 0:
-        x_norm = 0.0000000001
-    return x_norm
-
-
-# evaluation
-def evaluate(x):
-    return np.array(list(map(lambda y: simulation(env,y), x)))
-
-
-# tournament
-def tournament(pop):
-    c1 =  np.random.randint(0,pop.shape[0], 1)
-    c2 =  np.random.randint(0,pop.shape[0], 1)
-
-    if fit_pop[c1] > fit_pop[c2]:
-        return pop[c1][0]
-    else:
-        return pop[c2][0]
-
-
-# limits
-def limits(x):
-
-    if x>dom_u:
-        return dom_u
-    elif x<dom_l:
-        return dom_l
-    else:
-        return x
-
-
-# crossover
-def crossover(pop):
-
-    total_offspring = np.zeros((0,n_vars))
-
-
-    for p in range(0,pop.shape[0], 2):
-        p1 = tournament(pop)
-        p2 = tournament(pop)
-
-        n_offspring =   np.random.randint(1,3+1, 1)[0]
-        offspring =  np.zeros( (n_offspring, n_vars) )
-
-        for f in range(0,n_offspring):
-
-            cross_prop = np.random.uniform(0,1)
-            offspring[f] = p1*cross_prop+p2*(1-cross_prop)
-
-            # mutation
-            for i in range(0,len(offspring[f])):
-                if np.random.uniform(0 ,1)<=mutation:
-                    offspring[f][i] =   offspring[f][i]+np.random.normal(0, 1)
-
-            offspring[f] = np.array(list(map(lambda y: limits(y), offspring[f])))
-
-            total_offspring = np.vstack((total_offspring, offspring[f]))
-
-    return total_offspring
-
-
-# kills the worst genomes, and replace with new best/random solutions
-def doomsday(pop,fit_pop):
-
-    worst = int(npop/4)  # a quarter of the population
-    order = np.argsort(fit_pop)
-    orderasc = order[0:worst]
-
-    for o in orderasc:
-        for j in range(0,n_vars):
-            pro = np.random.uniform(0,1)
-            if np.random.uniform(0,1)  <= pro:
-                pop[o][j] = np.random.uniform(dom_l, dom_u) # random dna, uniform dist.
+        # Perform blend crossover for each gene
+        for i in range(len(parent1)):
+            if np.random.uniform(0, 1) > self.crossover_rate:
+                min_val = min(parent1[i], parent2[i])
+                max_val = max(parent1[i], parent2[i])
+                range_val = max_val - min_val
+                offspring[i] = np.random.uniform(min_val - self.alpha * range_val, max_val + self.alpha * range_val)
             else:
-                pop[o][j] = pop[order[-1:]][0][j] # dna from best
+                offspring[i] = parent1[i]
 
-        fit_pop[o]=evaluate([pop[o]])
+        return self.clamp(offspring)
 
-    return pop,fit_pop
+    def mutate_individual(self, individual):
+        for i in range(len(individual)):
+            individual[i] += np.random.normal(0, self.mutation_std)
 
+        return self.clamp(individual)
 
+    def evaluate_population(self):
+        return np.array([self.simulation(individual) for individual in self.population])
 
-# loads file with the best solution for testing
-if run_mode =='test':
+    # runs simulation
+    def simulation(self, x):
+        f, p, e, t = self.env.play(pcont=x)
+        return f
 
-    bsol = np.loadtxt(experiment_name+'/best.txt')
-    print( '\n RUNNING SAVED BEST SOLUTION \n')
-    env.update_parameter('speed','normal')
-    evaluate([bsol])
-
-    sys.exit(0)
-
-
-# initializes population loading old solutions or generating new ones
-
-if not os.path.exists(experiment_name+'/evoman_solstate'):
-
-    print( '\nNEW EVOLUTION\n')
-
-    pop = np.random.uniform(dom_l, dom_u, (npop, n_vars))
-    fit_pop = evaluate(pop)
-    best = np.argmax(fit_pop)
-    mean = np.mean(fit_pop)
-    std = np.std(fit_pop)
-    ini_g = 0
-    solutions = [pop, fit_pop]
-    env.update_solutions(solutions)
-
-else:
-
-    print( '\nCONTINUING EVOLUTION\n')
-
-    env.load_state()
-    pop = env.solutions[0]
-    fit_pop = env.solutions[1]
-
-    best = np.argmax(fit_pop)
-    mean = np.mean(fit_pop)
-    std = np.std(fit_pop)
-
-    # finds last generation number
-    file_aux  = open(experiment_name+'/gen.txt','r')
-    ini_g = int(file_aux.readline())
-    file_aux.close()
+    # calculates the euclidean distance between two individuals
+    def distance(self, one, two):
+        return np.linalg.norm(one - two)
 
 
+    # Calculate the average variety (pairwise distance) in the population
+    def calculate_variety(self):
+        total_distance = 0
+        num_comparisons = 0
+
+        # Loop through all pairs of individuals in the population
+        for i in range(len(self.population)):
+            for j in range(i + 1, len(self.population)):  # Avoid double counting
+                total_distance += self.distance(self.population[i], self.population[j])
+                num_comparisons += 1
+
+        # Return the average distance (variety)
+        if num_comparisons > 0:
+            return total_distance / num_comparisons
+        else:
+            return 0
+
+    # Store fitness statistics and variety for each generation
+    def store_fitness_stats(self, generation, max_fitness, mean_fitness, std_fitness, variety):
+        self.fitness_stats.append([generation, max_fitness, mean_fitness, std_fitness, variety])
+
+   # Save fitness statistics to a CSV file
+    def save_fitness_stats_to_csv(self):
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        ea = "EA1"  # Updated EA number
+        enemy = str(self.enemy)  # Updated enemy number
+
+        # Define the path for the CSV file
+        csv_path = f"testdata/{ea}/{enemy}"
+        os.makedirs(csv_path, exist_ok=True)
+        csv_filename = f"{csv_path}/fitness_stats_enemy{self.enemy}_{timestamp}.csv"  # Updated filename with enemy number
+
+        # Write the fitness statistics to a CSV file
+        with open(csv_filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Generation", "Max Fitness", "Mean Fitness", "Std Fitness", "Variety"])  # Header
+            writer.writerows(self.fitness_stats)
+
+        print(f"Fitness statistics saved to {csv_filename}")
+
+    # The main evolutionary algorithm loop is now inside the run method
+    def run(self):
+        best_solution = None
+        best_solution_fitness = float('-inf')
+
+        # Go for the set amount of generations
+        for generation in range(self.no_generations):
+            fitness_population = self.evaluate_population()
+            next_generation = []
+
+            # Make new offspring until we have a new full generation
+            while len(next_generation) < self.population_size:
+                # Select two parents using tournament selection
+                p1 = self.tournament_selection(fitness_population)
+                p2 = self.tournament_selection(fitness_population)
+
+                # Perform crossover to produce offspring
+                offspring = self.crossover_single(p1, p2)
+
+                # Mutate offspring
+                if np.random.uniform(0, 1) < self.mutation_rate:
+                    offspring = self.mutate_individual(offspring)
+
+                next_generation.append(offspring)
+
+            # Replace old population with the new one
+            self.population = np.array(next_generation)[:self.population_size]
+
+            # Calculate fitness statistics
+            generation_max_fitness = np.max(fitness_population)
+            generation_mean_fitness = np.mean(fitness_population)
+            generation_std_fitness = np.std(fitness_population)
+            generation_variety = self.calculate_variety()
+
+            # Store fitness statistics and variety for this generation
+            self.store_fitness_stats(generation + 1, generation_max_fitness, generation_mean_fitness, generation_std_fitness, generation_variety)
+
+            # Log the best fitness for monitoring
+            if generation_max_fitness > best_solution_fitness:
+                best_solution = self.population[np.argmax(fitness_population)]
+                best_solution_fitness = generation_max_fitness
+
+            print(f"{generation + 1}/{self.no_generations}, max: {generation_max_fitness}, mean: {generation_mean_fitness}, std: {generation_std_fitness}, variety: {generation_variety}")
+
+        # Final evaluation and results
+        fitness_population = self.evaluate_population()  # Evaluate final population
+        generation_max_fitness = np.max(fitness_population)
+        if generation_max_fitness > best_solution_fitness:
+            best_solution = self.population[np.argmax(fitness_population)]
+            best_solution_fitness = generation_max_fitness
+
+        print(f"Final Generation: max: {best_solution_fitness}, mean: {np.mean(fitness_population)}, std: {np.std(fitness_population)}, variety: {self.calculate_variety()}")
+        print("Best Fitness:", best_solution_fitness)
+
+        # Save the best solution weights to a file
+        np.save('best_solution_weights.npy', best_solution)
+
+        # Save the fitness statistics to a CSV file
+        self.save_fitness_stats_to_csv()
 
 
-# saves results for first pop
-file_aux  = open(experiment_name+'/results.txt','a')
-file_aux.write('\n\ngen best mean std')
-print( '\n GENERATION '+str(ini_g)+' '+str(round(fit_pop[best],6))+' '+str(round(mean,6))+' '+str(round(std,6)))
-file_aux.write('\n'+str(ini_g)+' '+str(round(fit_pop[best],6))+' '+str(round(mean,6))+' '+str(round(std,6))   )
-file_aux.close()
+def main():
+    # choose this for not using visuals and thus making experiments faster
+    headless = True
+    if headless:
+        os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+    experiment_name = 'optimization_test'
+    if not os.path.exists(experiment_name):
+        os.makedirs(experiment_name)
+
+    n_hidden_neurons = 10
+
+    # Initializes simulation in individual evolution mode, for single static enemy.
+    env = CustomEnvironment(experiment_name=experiment_name,
+                            enemies=[2],  # Set enemy here
+                            playermode="ai",
+                            player_controller=player_controller(n_hidden_neurons),  # you can insert your own controller here
+                            enemymode="static",
+                            level=2,
+                            speed="fastest",
+                            visuals=False)
+
+    n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
+
+    # EA configuration
+    population_size = 100
+    no_generations = 10
+    upper_bound = 1
+    lower_bound = -1
+    crossover_rate = 0.7
+    alpha = 0.5
+    mutation_rate = 0.1
+    mutation_std = 0.5
+    tournament_size = 5
+
+    enemy = 2  # Set the enemy here
+
+    assert enemy in [2, 5, 8], "Invalid enemy number. Choose from 2, 5, or 8."
+
+    # run one iteration for now
+    for i in range(1):
+        # Initialize the EA object
+        ea = EA(population_size=population_size,
+                n_vars=n_vars,
+                upper_bound=upper_bound,
+                lower_bound=lower_bound,
+                crossover_rate=crossover_rate,
+                mutation_rate=mutation_rate,
+                mutation_std=mutation_std,
+                tournament_size=tournament_size,
+                alpha=alpha,
+                env=env,
+                no_generations=no_generations,
+                enemy=enemy)  # Pass the enemy value here
+
+        # Run the evolutionary algorithm
+        ea.run()
 
 
-# evolution
-
-last_sol = fit_pop[best]
-notimproved = 0
-
-for i in range(ini_g+1, gens):
-
-    offspring = crossover(pop)  # crossover
-    fit_offspring = evaluate(offspring)   # evaluation
-    pop = np.vstack((pop,offspring))
-    fit_pop = np.append(fit_pop,fit_offspring)
-
-    best = np.argmax(fit_pop) #best solution in generation
-    fit_pop[best] = float(evaluate(np.array([pop[best] ]))[0]) # repeats best eval, for stability issues
-    best_sol = fit_pop[best]
-
-    # selection
-    fit_pop_cp = fit_pop
-    fit_pop_norm =  np.array(list(map(lambda y: norm(y,fit_pop_cp), fit_pop))) # avoiding negative probabilities, as fitness is ranges from negative numbers
-    probs = (fit_pop_norm)/(fit_pop_norm).sum()
-    chosen = np.random.choice(pop.shape[0], npop , p=probs, replace=False)
-    chosen = np.append(chosen[1:],best)
-    pop = pop[chosen]
-    fit_pop = fit_pop[chosen]
-
-
-    # searching new areas
-
-    if best_sol <= last_sol:
-        notimproved += 1
-    else:
-        last_sol = best_sol
-        notimproved = 0
-
-    if notimproved >= 15:
-
-        file_aux  = open(experiment_name+'/results.txt','a')
-        file_aux.write('\ndoomsday')
-        file_aux.close()
-
-        pop, fit_pop = doomsday(pop,fit_pop)
-        notimproved = 0
-
-    best = np.argmax(fit_pop)
-    std  =  np.std(fit_pop)
-    mean = np.mean(fit_pop)
-
-
-    # saves results
-    file_aux  = open(experiment_name+'/results.txt','a')
-    print( '\n GENERATION '+str(i)+' '+str(round(fit_pop[best],6))+' '+str(round(mean,6))+' '+str(round(std,6)))
-    file_aux.write('\n'+str(i)+' '+str(round(fit_pop[best],6))+' '+str(round(mean,6))+' '+str(round(std,6))   )
-    file_aux.close()
-
-    # saves generation number
-    file_aux  = open(experiment_name+'/gen.txt','w')
-    file_aux.write(str(i))
-    file_aux.close()
-
-    # saves file with the best solution
-    np.savetxt(experiment_name+'/best.txt',pop[best])
-
-    # saves simulation state
-    solutions = [pop, fit_pop]
-    env.update_solutions(solutions)
-    env.save_state()
-
-
-
-
-fim = time.time() # prints total execution time for experiment
-print( '\nExecution time: '+str(round((fim-ini)/60))+' minutes \n')
-print( '\nExecution time: '+str(round((fim-ini)))+' seconds \n')
-
-
-file = open(experiment_name+'/neuroended', 'w')  # saves control (simulation has ended) file for bash loop file
-file.close()
-
-
-env.state_to_log() # checks environment state
+if __name__ == '__main__':
+    main()
