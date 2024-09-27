@@ -182,12 +182,14 @@ class EA:
 
     # Load the best solution weights from a file
     def load_best_solution(self):
-        filename = "best_solution_weights.npz"
+        directory = f"best_solutions/EA{1}/{self.enemy}/"
+        filename = f"{directory}solution_with_fitness.npz"
+
         if os.path.exists(filename):
             data = np.load(filename)
             best_solution = data['weights']
             best_solution_fitness = data['fitness']
-            print(f"Loaded best solution with fitness: {best_solution_fitness}")
+            print(f"Loaded best solution with fitness: {best_solution_fitness} from {filename}")
             return best_solution, best_solution_fitness
         else:
             # No solution saved yet, initialize with an empty solution and very bad fitness
@@ -195,9 +197,12 @@ class EA:
 
     # Save the best solution weights to a file
     def save_best_solution(self, best_solution, best_solution_fitness):
-        filename = "best_solution_weights.npz"
+        directory = f"best_solutions/EA{1}/{self.enemy}/"
+        os.makedirs(directory, exist_ok=True)
+        filename = f"{directory}solution_with_fitness.npz"
+
         np.savez(filename, weights=best_solution, fitness=best_solution_fitness)
-        print(f"Best solution saved with fitness: {best_solution_fitness}")
+        print(f"Best solution saved with fitness: {best_solution_fitness} to {filename}")
 
 
     # The main evolutionary algorithm loop is now inside the run method
@@ -299,7 +304,7 @@ def main():
     mutation_std = 0.5
     tournament_size = 5
 
-    enemy = 2  # Set the enemy here
+    enemy = 8  # Set the enemy here
 
     assert enemy in [2, 5, 8], "Invalid enemy number. Choose from 2, 5, or 8."
 
