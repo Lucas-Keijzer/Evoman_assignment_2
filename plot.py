@@ -2,6 +2,7 @@ import os
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
+# from PyQt5 import QtCore, QtGui, QtWidgets
 
 # Function to load mean, max fitness, and variety data from CSV files
 def load_fitness_data(ea_folder, enemy_folder):
@@ -48,43 +49,67 @@ def load_fitness_data(ea_folder, enemy_folder):
 
     return valid_generations, avg_max_fitness, avg_mean_fitness, std_max_fitness, std_mean_fitness, avg_variety, std_variety
 
-# Function to plot fitness statistics and variety
-def plot_fitness_statistics(generations, avg_max_fitness, std_max_fitness, avg_mean_fitness, std_mean_fitness, avg_variety, std_variety, ea, enemy):
+# Function to plot the fitness statistics for multiple EAs
+def plot_fitness_statistics(generations, ea1_data, ea2_data, ea1_label, ea2_label, enemy):
     plt.figure(figsize=(12, 12))
 
-    # Plot mean and max fitness on the first subplot
+    # Extract data for EA1
+    avg_max_fitness_ea1, std_max_fitness_ea1, avg_mean_fitness_ea1, std_mean_fitness_ea1, avg_variety_ea1, std_variety_ea1 = ea1_data
+    # Extract data for EA2
+    avg_max_fitness_ea2, std_max_fitness_ea2, avg_mean_fitness_ea2, std_mean_fitness_ea2, avg_variety_ea2, std_variety_ea2 = ea2_data
+
+    # Plot mean and max fitness on the first subplot EA1
     plt.subplot(2, 1, 1)
-    plt.plot(generations, avg_max_fitness, label='Avg Max Fitness', color='red', linewidth=2)
-    plt.plot(generations, avg_mean_fitness, label='Avg Mean Fitness', color='blue', linewidth=2)
+    plt.plot(generations, avg_max_fitness_ea1, label=f'Avg Max Fitness {ea1_label}', color='red', linewidth=2)
+    plt.plot(generations, avg_mean_fitness_ea1, label=f'Avg Mean Fitness {ea1_label}', color='blue', linewidth=2)
 
-    # Plot the shading for standard deviation
+    # Plot the standard deviation for EA1
     plt.fill_between(generations,
-                     np.array(avg_max_fitness) - np.array(std_max_fitness),
-                     np.array(avg_max_fitness) + np.array(std_max_fitness),
-                     color='red', alpha=0.2, label='Max Fitness Std Dev')
+                     np.array(avg_max_fitness_ea1) - np.array(std_max_fitness_ea1),
+                     np.array(avg_max_fitness_ea1) + np.array(std_max_fitness_ea1),
+                     color='red', alpha=0.2, label=f'{ea1_label} Max Fitness Std Dev')
 
     plt.fill_between(generations,
-                     np.array(avg_mean_fitness) - np.array(std_mean_fitness),
-                     np.array(avg_mean_fitness) + np.array(std_mean_fitness),
-                     color='blue', alpha=0.2, label='Mean Fitness Std Dev')
+                     np.array(avg_mean_fitness_ea1) - np.array(std_mean_fitness_ea1),
+                     np.array(avg_mean_fitness_ea1) + np.array(std_mean_fitness_ea1),
+                     color='blue', alpha=0.2, label=f'{ea1_label} Mean Fitness Std Dev')
 
-    plt.title(f'Fitness Statistics for EA: {ea}, Enemy: {enemy}')
+    # Plot mean and max fitness for EA2
+    plt.plot(generations, avg_max_fitness_ea2, label=f'Avg Max Fitness {ea2_label}', color='orange', linewidth=2, linestyle='--')
+    plt.plot(generations, avg_mean_fitness_ea2, label=f'Avg Mean Fitness {ea2_label}', color='purple', linewidth=2, linestyle='--')
+
+    # Plot standard deviation for EA2
+    plt.fill_between(generations,
+                     np.array(avg_max_fitness_ea2) - np.array(std_max_fitness_ea2),
+                     np.array(avg_max_fitness_ea2) + np.array(std_max_fitness_ea2),
+                     color='orange', alpha=0.2, label=f'{ea2_label} Max Fitness Std Dev')
+
+    plt.fill_between(generations,
+                     np.array(avg_mean_fitness_ea2) - np.array(std_mean_fitness_ea2),
+                     np.array(avg_mean_fitness_ea2) + np.array(std_mean_fitness_ea2),
+                     color='purple', alpha=0.2, label=f'{ea2_label} Mean Fitness Std Dev')
+
+    plt.title(f'Fitness Statistics for Enemy: {enemy}')
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
     plt.legend()
     plt.grid()
 
-    # Plot variety on the second subplot
+    # Plot variety 
     plt.subplot(2, 1, 2)
-    plt.plot(generations, avg_variety, label='Avg Variety', color='green', linewidth=2)
-
-    # Plot the shading for standard deviation
+    plt.plot(generations, avg_variety_ea1, label=f'Avg Variety {ea1_label}', color='green', linewidth=2)
     plt.fill_between(generations,
-                     np.array(avg_variety) - np.array(std_variety),
-                     np.array(avg_variety) + np.array(std_variety),
-                     color='green', alpha=0.2, label='Variety Std Dev')
+                     np.array(avg_variety_ea1) - np.array(std_variety_ea1),
+                     np.array(avg_variety_ea1) + np.array(std_variety_ea1),
+                     color='green', alpha=0.2, label=f'{ea1_label} Variety Std Dev')
 
-    plt.title(f'Variety Statistics for EA: {ea}, Enemy: {enemy}')
+    plt.plot(generations, avg_variety_ea2, label=f'Avg Variety {ea2_label}', color='cyan', linewidth=2, linestyle='--')
+    plt.fill_between(generations,
+                     np.array(avg_variety_ea2) - np.array(std_variety_ea2),
+                     np.array(avg_variety_ea2) + np.array(std_variety_ea2),
+                     color='cyan', alpha=0.2, label=f'{ea2_label} Variety Std Dev')
+
+    plt.title(f'Variety Statistics for Enemy: {enemy}')
     plt.xlabel('Generation')
     plt.ylabel('Variety')
     plt.legend()
@@ -92,27 +117,33 @@ def plot_fitness_statistics(generations, avg_max_fitness, std_max_fitness, avg_m
     plt.tight_layout()
 
     # Save the plot
-    output_folder = f"plots/{ea}/{enemy}"
+    output_folder = f"plots/EA1_vs_EA2/enemy_{enemy}"
     os.makedirs(output_folder, exist_ok=True)
     plt.savefig(f"{output_folder}/fitness_and_variety_statistics_enemy{enemy}.png")
     plt.show()
     plt.close()
 
+
 # Main function to run the plotting
 def main():
     base_data_folder = 'testdata'
-    ea = 'EA1'  # Change to the specific EA you want to analyze
+    ea1 = 'EA1'
+    ea2 = 'EA2'
     enemy = '2'  # Change to the specific enemy you want to analyze
 
-    ea_folder = os.path.join(base_data_folder, ea)
+    ea1_folder = os.path.join(base_data_folder, ea1)
+    ea2_folder = os.path.join(base_data_folder, ea2)
+
     enemy_folder = enemy
 
-    # Load the fitness and variety data
-    generations, avg_max_fitness, avg_mean_fitness, std_max_fitness, std_mean_fitness, avg_variety, std_variety = load_fitness_data(ea_folder, enemy_folder)
+    generations, avg_max_fitness_ea1, avg_mean_fitness_ea1, std_max_fitness_ea1, std_mean_fitness_ea1, avg_variety_ea1, std_variety_ea1 = load_fitness_data(ea1_folder, enemy_folder)
+    _, avg_max_fitness_ea2, avg_mean_fitness_ea2, std_max_fitness_ea2, std_mean_fitness_ea2, avg_variety_ea2, std_variety_ea2 = load_fitness_data(ea2_folder, enemy_folder)
 
-    # Plot the statistics
-    plot_fitness_statistics(generations, avg_max_fitness, std_max_fitness, avg_mean_fitness, std_mean_fitness, avg_variety, std_variety, ea, enemy)
-    print(f"Plot saved for EA: {ea}, Enemy: {enemy}")
+    ea1_data = (avg_max_fitness_ea1, std_max_fitness_ea1, avg_mean_fitness_ea1, std_mean_fitness_ea1, avg_variety_ea1, std_variety_ea1)
+    ea2_data = (avg_max_fitness_ea2, std_max_fitness_ea2, avg_mean_fitness_ea2, std_mean_fitness_ea2, avg_variety_ea2, std_variety_ea2)
+
+    plot_fitness_statistics(generations, ea1_data, ea2_data, 'EA1', 'EA2', enemy)
+    print(f"Plot saved for EA1 vs EA2, Enemy: {enemy}")
 
 
 if __name__ == '__main__':
