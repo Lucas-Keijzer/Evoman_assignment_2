@@ -275,6 +275,8 @@ class EA:
 
 
 def main():
+    
+    
     # choose this for not using visuals and thus making experiments faster
     headless = True
     if headless:
@@ -299,39 +301,50 @@ def main():
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
     # EA configuration
-    population_size = 100
-    no_generations = 10
+    population_size = 130
+    no_generations = 30
     upper_bound = 1
     lower_bound = -1
     crossover_rate = 0.7
-    alpha = 0.5
-    mutation_rate = 0.1
-    mutation_std = 0.5
-    tournament_size = 5
+    alpha = 0.75
+    mutation_rate = 0.22
+    mutation_std = 0.45
+    tournament_size = 7
 
-    enemy = 2  # Set the enemy here
+    # enemy = 2  # Set the enemy here
+    
+    for enemy in [2,5,8]:
+        print(enemy)
+        for run in range(10):
+            print(run+1, "/10")
+            assert enemy in [2, 5, 8], "Invalid enemy number. Choose from 2, 5, or 8."
 
-    assert enemy in [2, 5, 8], "Invalid enemy number. Choose from 2, 5, or 8."
+            # run one iteration for now
+            for i in range(1):
+                # Initialize the EA object
+                ea = EA(population_size=population_size,
+                        n_vars=n_vars,
+                        upper_bound=upper_bound,
+                        lower_bound=lower_bound,
+                        crossover_rate=crossover_rate,
+                        mutation_rate=mutation_rate,
+                        mutation_std=mutation_std,
+                        tournament_size=tournament_size,
+                        alpha=alpha,
+                        env=env,
+                        no_generations=no_generations,
+                        enemy=enemy)  # Pass the enemy value here
 
-    # run one iteration for now
-    for i in range(1):
-        # Initialize the EA object
-        ea = EA(population_size=population_size,
-                n_vars=n_vars,
-                upper_bound=upper_bound,
-                lower_bound=lower_bound,
-                crossover_rate=crossover_rate,
-                mutation_rate=mutation_rate,
-                mutation_std=mutation_std,
-                tournament_size=tournament_size,
-                alpha=alpha,
-                env=env,
-                no_generations=no_generations,
-                enemy=enemy)  # Pass the enemy value here
-
-        # Run the evolutionary algorithm
-        ea.run()
+                # Run the evolutionary algorithm
+                ea.run()
 
 
 if __name__ == '__main__':
     main()
+
+# population = 130
+# mutation_std= 0.45
+# crossover_rate = 0.9
+# mutation_rate = 0.22
+# params_alpha - 0.75
+# tournament_size = 7
