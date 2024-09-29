@@ -43,7 +43,7 @@ def load_best_solution(ea, enemy):
 
 
 def plot_boxplots(gains_ea1, gains_ea2, enemies):
-    fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharey=True)  # sharey=True for shared y-axis
+    fig, axes = plt.subplots(3, 1, figsize=(12, 18), sharey=True)  # sharey=True for shared y-axis
 
     for i, enemy in enumerate(enemies):
         # Prepare data for boxplot
@@ -53,15 +53,15 @@ def plot_boxplots(gains_ea1, gains_ea2, enemies):
         axes[i].boxplot(data, labels=['EA1', 'EA2'])
 
         # Increase font sizes
-        axes[i].set_title(f'Enemy {enemy}', fontsize=18)  # Increase title size
+        axes[i].set_title(f'Enemy {enemy}', fontsize=28)  # Increase title size
         axes[i].tick_params(axis='y', labelsize=12)  # Increase y-axis tick label size
         axes[i].tick_params(axis='x', labelsize=12)  # Increase x-axis tick label size
 
     # Set shared y-axis label, placing it outside of the plot
-    fig.text(0.03, 0.5, 'Gain (Player Life - Enemy Life)', va='center', rotation='vertical', fontsize=14)
+    fig.text(0.03, 0.5, 'Gain (Player Life - Enemy Life)', va='center', rotation='vertical', fontsize=24)
 
     # Add a title for the entire figure
-    fig.suptitle('Boxplots of 5 Runs per EA per Enemy', fontsize=20)
+    fig.suptitle('Boxplots of 5 Runs per EA per Enemy', fontsize=30)
 
     # Adjust layout to prevent overlap and leave space for the y-label and title
     plt.subplots_adjust(left=0.06, right=0.95, top=0.85, bottom=0.1)  # Increased top to fit the title

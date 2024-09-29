@@ -66,7 +66,7 @@ def load_data(ea_folder, enemy_folder):
 # Function to plot the fitness statistics for multiple EAs
 def plot_fitness(ea1_folder, ea2_folder):
     enemies = ['2', '5', '8']  # List of enemies
-    fig, axs = plt.subplots(1, 3, figsize=(24, 8))  # Create a figure with 1 row and 3 columns
+    fig, axs = plt.subplots(3, 1, figsize=(16, 24))  # Create a figure with 3 rows and 1 column
 
     for i, enemy in enumerate(enemies):
         generations, avg_max_fitness_ea1, avg_mean_fitness_ea1, std_max_fitness_ea1, std_mean_fitness_ea1, _, _ = load_data(ea1_folder, enemy)
@@ -99,9 +99,13 @@ def plot_fitness(ea1_folder, ea2_folder):
                             color='purple', alpha=0.2)
 
         # Set titles for each subplot
-        axs[i].set_title(f'Fitness Statistics for enemy {enemy}', fontsize=16)
+        axs[i].set_title(f'Fitness Statistics for enemy {enemy}', fontsize=50)
         axs[i].grid(True)
 
+        # font size both axis
+        axs[i].tick_params(axis='both', which='major', labelsize=14)
+        
+        
         # Create an inset for the zoomed-in view
         axins = inset_axes(axs[i], width="30%", height="30%", loc='lower right', borderpad=2)  # borderpad adjusts the inset's padding
         axins.plot(generations, avg_max_fitness_ea1, color='red', linewidth=2)
@@ -121,14 +125,14 @@ def plot_fitness(ea1_folder, ea2_folder):
         axins.grid(True)
 
     # Set a single ylabel for all subplots
-    axs[0].set_ylabel('Fitness', fontsize=14)
+    axs[1].set_ylabel('Fitness', fontsize=50)
 
     # Centralize the x-label for the entire figure
-    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=14)
+    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=50)
 
     # Set a common legend in the bottom right of the figure, slightly higher
     handles, labels = axs[0].get_legend_handles_labels()  # Get legend handles from the first subplot
-    fig.legend(handles, labels, loc='lower right', fontsize=10, bbox_to_anchor=(0.33, 0.45))
+    # fig.legend(handles, labels, loc='center', fontsize=40, bbox_to_anchor=(0.33, 0.45))
 
     # Adjust the layout to increase padding between plots
     plt.tight_layout(pad=4.0)  # Increase padding between subplots
@@ -143,7 +147,7 @@ def plot_fitness(ea1_folder, ea2_folder):
 # Function to plot the diversity statistics for multiple EAs
 def plot_diversity(ea1_folder, ea2_folder):
     enemies = ['2', '5', '8']  # List of enemies
-    fig, axs = plt.subplots(1, 3, figsize=(24, 8))  # Create a figure with 1 row and 3 columns
+    fig, axs = plt.subplots(3, 1, figsize=(16, 24))  # Create a figure with 3 rows and 1 column
 
     for i, enemy in enumerate(enemies):
         generations, _, _, _, _, avg_diversity_ea1, std_diversity_ea1 = load_data(ea1_folder, enemy)
@@ -164,18 +168,22 @@ def plot_diversity(ea1_folder, ea2_folder):
                             color='cyan', alpha=0.2)
 
         # Set titles for each subplot
-        axs[i].set_title(f'Diversity Statistics for Enemy: {enemy}', fontsize=16)
+        axs[i].set_title(f'Diversity Statistics for Enemy: {enemy}', fontsize=50)
         axs[i].grid(True)
 
+        # font size both axis
+        axs[i].tick_params(axis='both', which='major', labelsize=14)
+
+
     # Set a single ylabel for all subplots
-    axs[0].set_ylabel('Diversity (average euclidean distance)', fontsize=14)
+    axs[1].set_ylabel('Diversity (average euclidean distance)', fontsize=50)
 
     # Centralize the x-label for the entire figure
-    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=14)
+    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=50)
 
     # Set a common legend in the bottom right of the figure
     handles, labels = axs[0].get_legend_handles_labels()  # Get legend handles from the first subplot
-    fig.legend(handles, labels, loc='lower right', fontsize=10, bbox_to_anchor=(0.98, 0.55))
+    fig.legend(handles, labels, loc='lower right', fontsize=40, bbox_to_anchor=(0.98, 0.55))
 
     # Adjust the layout to increase padding between plots
     plt.tight_layout(pad=4.0)  # Increase padding between subplots
