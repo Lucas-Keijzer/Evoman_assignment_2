@@ -285,7 +285,7 @@ class HyperparameterTuner:
             "mutation_std": [0.1, 0.3, 0.5],
             "alpha": [0.1, 0.5, 0.9],
             "tournament_size": [3, 5, 7],
-            "no_generations": [10, 20, 50]
+            "no_generations": 10
         }
 
         # Randomly sample from the search space for `num_searches` trials
@@ -306,7 +306,7 @@ class HyperparameterTuner:
         # Run EA for each configuration
         for config in configurations:
             print(f"Testing configuration: {config}")
-            
+
             # Create the EA instance with the current hyperparameter configuration
             ea = EA(
                 population_size=config["population_size"],
@@ -383,21 +383,21 @@ def objective(trial):
     # Optuna maximizes by default, so we return the negative of fitness if we're minimizing
     # return ea.best_solution_fitness  # Return the best fitness as the objective value
     fitness_population = ea.evaluate_population()
-    mean_fitness = np.max(fitness_population)
-    
+    mean_fitness = np.mean(fitness_population)
+
     return mean_fitness
 
 # Function to execute the study
 def run_optuna_study(n_trials=2):
-    study_name = "optuna_sharing_max"
+    study_name = "optuna_sharing_mean"
     storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
-    
+
     # Create or load an existing study from the SQLite database
     study = optuna.create_study(study_name=study_name, direction="maximize", storage=storage_name, load_if_exists=True)
-    
-    study.optimize(objective, n_trials=n_trials)
-    
+
+    study.optimize(objective, n_trials=n_trials)  # Run the optimization
+
     print("Study results saved to SQLite database.")
 
 if __name__ == "__main__":
-    run_optuna_study(n_trials=30)  # Set the number of trials (iterations)
+    run_optuna_study(n_trials=10)  # Set the number of trials (iterations)
