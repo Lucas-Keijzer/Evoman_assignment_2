@@ -63,6 +63,7 @@ def load_data(ea_folder, enemy_folder):
 
     return valid_generations, avg_max_fitness, avg_mean_fitness, std_max_fitness, std_mean_fitness, avg_variety, std_variety
 
+
 # Function to plot the fitness statistics for multiple EAs
 def plot_fitness(ea1_folder, ea2_folder):
     enemies = ['2', '5', '8']  # List of enemies
@@ -73,8 +74,8 @@ def plot_fitness(ea1_folder, ea2_folder):
         _, avg_max_fitness_ea2, avg_mean_fitness_ea2, std_max_fitness_ea2, std_mean_fitness_ea2, _, _ = load_data(ea2_folder, enemy)
 
         # Plot EA1
-        axs[i].plot(generations, avg_max_fitness_ea1, label=f'Avg Max Fitness {ea1} Enemy {enemy}', color='red', linewidth=2)
-        axs[i].plot(generations, avg_mean_fitness_ea1, label=f'Avg Mean Fitness {ea1} Enemy {enemy}', color='blue', linestyle='-', linewidth=2)
+        axs[i].plot(generations, avg_max_fitness_ea1, label=f'Avg Max Fitness EA1', color='red', linewidth=2)
+        axs[i].plot(generations, avg_mean_fitness_ea1, label=f'Avg Mean Fitness EA1', color='blue', linestyle='-', linewidth=2)
         axs[i].fill_between(generations,
                             np.array(avg_max_fitness_ea1) - np.array(std_max_fitness_ea1),
                             np.array(avg_max_fitness_ea1) + np.array(std_max_fitness_ea1),
@@ -86,8 +87,8 @@ def plot_fitness(ea1_folder, ea2_folder):
                             color='blue', alpha=0.2)
 
         # Plot EA2
-        axs[i].plot(generations, avg_max_fitness_ea2, label=f'Avg Max Fitness {ea2} Enemy {enemy}', color='orange', linewidth=2)
-        axs[i].plot(generations, avg_mean_fitness_ea2, label=f'Avg Mean Fitness {ea2} Enemy {enemy}', color='purple', linestyle='-', linewidth=2)
+        axs[i].plot(generations, avg_max_fitness_ea2, label=f'Avg Max Fitness EA2', color='orange', linewidth=2)
+        axs[i].plot(generations, avg_mean_fitness_ea2, label=f'Avg Mean Fitness EA2', color='purple', linestyle='-', linewidth=2)
         axs[i].fill_between(generations,
                             np.array(avg_max_fitness_ea2) - np.array(std_max_fitness_ea2),
                             np.array(avg_max_fitness_ea2) + np.array(std_max_fitness_ea2),
@@ -99,13 +100,12 @@ def plot_fitness(ea1_folder, ea2_folder):
                             color='purple', alpha=0.2)
 
         # Set titles for each subplot
-        axs[i].set_title(f'Fitness Statistics for enemy {enemy}', fontsize=50)
+        axs[i].set_title(f'Fitness statistics for enemy {enemy}', fontsize=20)  # Decreased title size
         axs[i].grid(True)
 
-        # font size both axis
-        axs[i].tick_params(axis='both', which='major', labelsize=14)
-        
-        
+        # Set font size for both axes
+        axs[i].tick_params(axis='both', which='major', labelsize=12)
+
         # Create an inset for the zoomed-in view
         axins = inset_axes(axs[i], width="30%", height="30%", loc='lower right', borderpad=2)  # borderpad adjusts the inset's padding
         axins.plot(generations, avg_max_fitness_ea1, color='red', linewidth=2)
@@ -125,74 +125,81 @@ def plot_fitness(ea1_folder, ea2_folder):
         axins.grid(True)
 
     # Set a single ylabel for all subplots
-    axs[1].set_ylabel('Fitness', fontsize=50)
+    axs[1].set_ylabel('Fitness', fontsize=20)  # Decreased font size for ylabel
 
     # Centralize the x-label for the entire figure
-    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=50)
+    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=20)  # Decreased font size for xlabel
 
-    # Set a common legend in the bottom right of the figure, slightly higher
+    # Set a common legend in a clear spot on the figure
     handles, labels = axs[0].get_legend_handles_labels()  # Get legend handles from the first subplot
-    # fig.legend(handles, labels, loc='center', fontsize=40, bbox_to_anchor=(0.33, 0.45))
+    fig.legend(handles, labels, loc='upper center', fontsize=14, bbox_to_anchor=(0.5, 0.94), ncol=2)
 
     # Adjust the layout to increase padding between plots
-    plt.tight_layout(pad=4.0)  # Increase padding between subplots
+    plt.tight_layout(pad=10.0)  # Increased padding between subplots for clarity
+    plt.subplots_adjust(top=0.80)
+
+    # adjust left and right padding
+    plt.subplots_adjust(left=0.1, right=0.95)
+
+    fig.suptitle('Fitness comparison between EA1 and EA2 over 10 runs per enemy', fontsize=16)
+
+    # Save the plot
+    plt.show()
 
     output_folder = "plots/EA1_vs_EA2/all_enemies"
     os.makedirs(output_folder, exist_ok=True)
     plt.savefig(f"{output_folder}/fitness_statistics_all_enemies.png")
-    plt.show()
     plt.close()
 
-
-# Function to plot the diversity statistics for multiple EAs
+# Function to plot the diversity statistics for Enemy 2
 def plot_diversity(ea1_folder, ea2_folder):
-    enemies = ['2', '5', '8']  # List of enemies
-    fig, axs = plt.subplots(3, 1, figsize=(16, 24))  # Create a figure with 3 rows and 1 column
+    enemy = '2'  # Only plot for Enemy 2
+    fig, ax = plt.subplots(1, 1, figsize=(16, 8))  # Create a figure with 1 row and 1 column
 
-    for i, enemy in enumerate(enemies):
-        generations, _, _, _, _, avg_diversity_ea1, std_diversity_ea1 = load_data(ea1_folder, enemy)
-        _, _, _, _, _, avg_diversity_ea2, std_diversity_ea2 = load_data(ea2_folder, enemy)
+    # Load data for Enemy 2
+    generations, _, _, _, _, avg_diversity_ea1, std_diversity_ea1 = load_data(ea1_folder, enemy)
+    _, _, _, _, _, avg_diversity_ea2, std_diversity_ea2 = load_data(ea2_folder, enemy)
 
-        # Plot EA1
-        axs[i].plot(generations, avg_diversity_ea1, label=f'Avg Diversity {ea1}', color='green', linewidth=2)
-        axs[i].fill_between(generations,
-                            np.array(avg_diversity_ea1) - np.array(std_diversity_ea1),
-                            np.array(avg_diversity_ea1) + np.array(std_diversity_ea1),
-                            color='green', alpha=0.2)
+    # Plot EA1
+    ax.plot(generations, avg_diversity_ea1, label=f'Avg Diversity EA1', color='green', linewidth=2)
+    ax.fill_between(generations,
+                    np.array(avg_diversity_ea1) - np.array(std_diversity_ea1),
+                    np.array(avg_diversity_ea1) + np.array(std_diversity_ea1),
+                    color='green', alpha=0.2)
 
-        # Plot EA2
-        axs[i].plot(generations, avg_diversity_ea2, label=f'Avg Diversity {ea2}', color='cyan', linewidth=2)
-        axs[i].fill_between(generations,
-                            np.array(avg_diversity_ea2) - np.array(std_diversity_ea2),
-                            np.array(avg_diversity_ea2) + np.array(std_diversity_ea2),
-                            color='cyan', alpha=0.2)
+    # Plot EA2
+    ax.plot(generations, avg_diversity_ea2, label=f'Avg Diversity EA2', color='cyan', linewidth=2)
+    ax.fill_between(generations,
+                    np.array(avg_diversity_ea2) - np.array(std_diversity_ea2),
+                    np.array(avg_diversity_ea2) + np.array(std_diversity_ea2),
+                    color='cyan', alpha=0.2)
 
-        # Set titles for each subplot
-        axs[i].set_title(f'Diversity Statistics for Enemy: {enemy}', fontsize=50)
-        axs[i].grid(True)
+    # Set title for the plot
+    ax.set_title(f'Diversity Statistics for enemy {enemy}', fontsize=24)
 
-        # font size both axis
-        axs[i].tick_params(axis='both', which='major', labelsize=14)
+    # Set labels and grid
+    ax.set_ylabel('Diversity (average euclidean distance)', fontsize=16)
+    ax.set_xlabel('Generation', fontsize=16)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.grid(True)
 
+    # Set a common legend in the top right
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, bbox_to_anchor=(0.95, 0.80), fontsize=14)
 
-    # Set a single ylabel for all subplots
-    axs[1].set_ylabel('Diversity (average euclidean distance)', fontsize=50)
+    # Adjust the layout to increase padding
+    plt.tight_layout(pad=4.0)
 
-    # Centralize the x-label for the entire figure
-    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=50)
+    plt.subplots_adjust(left=0.1, right=0.95, top=0.9, bottom=0.1)
 
-    # Set a common legend in the bottom right of the figure
-    handles, labels = axs[0].get_legend_handles_labels()  # Get legend handles from the first subplot
-    fig.legend(handles, labels, loc='lower right', fontsize=40, bbox_to_anchor=(0.98, 0.55))
-
-    # Adjust the layout to increase padding between plots
-    plt.tight_layout(pad=4.0)  # Increase padding between subplots
-
-    output_folder = "plots/EA1_vs_EA2/all_enemies"
-    os.makedirs(output_folder, exist_ok=True)
-    plt.savefig(f"{output_folder}/diversity_statistics_all_enemies.png")
     plt.show()
+
+    # Save the plot
+    output_folder = "plots/EA1_vs_EA2/enemy_2"
+    os.makedirs(output_folder, exist_ok=True)
+    plt.savefig(f"{output_folder}/diversity_statistics_enemy_2.png")
     plt.close()
+
 
 
 def main():
