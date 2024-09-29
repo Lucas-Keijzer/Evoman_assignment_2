@@ -4,10 +4,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load the study from the SQLite database
-# study_name = "optuna_crowding_mean"  # Replace with your actual study name
-# storage_name = "sqlite:///optuna_crowding_mean.db"  # SQLite database location
-study_name = "optuna_sharing_mean"  # Replace with your actual study name
-storage_name = "sqlite:///optuna_sharing_mean.db"
+study_name = "optuna_crowding_max"  # Replace with your actual study name
+storage_name = "sqlite:///optuna_crowding_max.db"  # SQLite database location
+# study_name = "optuna_study"  # Replace with your actual study name
+# storage_name = "sqlite:///optuna_crowding_mean.db"
 
 
 # Load the study

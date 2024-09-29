@@ -388,9 +388,9 @@ def objective(trial):
     # Optuna maximizes by default, so we return the negative of fitness if we're minimizing
     # return ea.best_solution_fitness  # Return the best fitness as the objective value
     fitness_population = ea.evaluate_population()
-    mean_fitness = np.max(fitness_population)
+    max_fitness = np.max(fitness_population)
     
-    return mean_fitness
+    return max_fitness
 
 
 # Function to execute the study
