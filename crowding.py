@@ -1,9 +1,16 @@
-###############################################################################
-# EvoMan FrameWork - V1.0 2016  			                                  #
-# DEMO : Neuroevolution - Genetic Algorithm  neural network.                  #
-# Author: Karine Miras        			                                      #
-# karine.smiras@gmail.com     				                                  #
-###############################################################################
+"""
+Author: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
+
+Description: This file is used to implement EA2 which makes use of crowding.
+This is a crossover method that ensurses the preservation of diversity in the
+population. This works by pairing parents with offspring based on the similarity
+between the parents and offspring. The offspring is paired with the parent that
+is most similar to it. The similarity is calculated as the Euclidean distance
+between the parent and offspring in the weight space. The EA2 class is used to
+run the evolutionary algorithm with the crowding method. This EA is then
+compared to the other EA implemented in fitness_sharing.py.
+"""
+
 
 # imports framework
 import sys
@@ -342,9 +349,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-# population = 130
-# mutation_std= 0.45
-# crossover_rate = 0.9
-# mutation_rate = 0.22
-# params_alpha - 0.75
-# tournament_size = 7

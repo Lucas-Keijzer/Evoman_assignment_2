@@ -1,9 +1,23 @@
+"""
+Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
+
+Description: This script is used to execute the best found solutions during
+the 10 runs of the two different EAs. The best solutions are saved in the
+final_best_solutions folder and are loaded from there. The best solutions are
+played against the respective three different enemies with RANDOM INITIALISATION
+(might change this back) and the results are visualized in boxplots.
+Additionally, a statistical test is performed to determine if the results are
+significantly different.
+"""
+
 # imports framework
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from evoman.environment import Environment
 from demo_controller import player_controller
+import scipy.stats as stats
+import pandas as pd
 
 experiment_name = 'boxplots'
 if not os.path.exists(experiment_name):
@@ -27,9 +41,9 @@ def load_best_solution(ea, enemy):
         # No solution saved yet, initialize with an empty solution and very bad fitness
         return None, float('-inf')
 
-# Function to create boxplots
+
 def plot_boxplots(gains_ea1, gains_ea2, enemies):
-    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharey=True)  # sharey=True for shared y-axis
 
     for i, enemy in enumerate(enemies):
         # Prepare data for boxplot
@@ -37,11 +51,65 @@ def plot_boxplots(gains_ea1, gains_ea2, enemies):
 
         # Create the boxplot
         axes[i].boxplot(data, labels=['EA1', 'EA2'])
-        axes[i].set_title(f'Enemy {enemy}')
-        axes[i].set_ylabel('Gain (Player Life - Enemy Life)')
 
-    plt.tight_layout()
+        # Increase font sizes
+        axes[i].set_title(f'Enemy {enemy}', fontsize=18)  # Increase title size
+        axes[i].tick_params(axis='y', labelsize=12)  # Increase y-axis tick label size
+        axes[i].tick_params(axis='x', labelsize=12)  # Increase x-axis tick label size
+
+    # Set shared y-axis label, placing it outside of the plot
+    fig.text(0.03, 0.5, 'Gain (Player Life - Enemy Life)', va='center', rotation='vertical', fontsize=14)
+
+    # Add a title for the entire figure
+    fig.suptitle('Boxplots of 5 Runs per EA per Enemy', fontsize=20)
+
+    # Adjust layout to prevent overlap and leave space for the y-label and title
+    plt.subplots_adjust(left=0.06, right=0.95, top=0.85, bottom=0.1)  # Increased top to fit the title
+    plt.tight_layout(rect=[0.05, 0, 1, 0.95])  # Ensure layout is adjusted for y-label and title
+
+    # Save the plot in the existing 'plots' folder as 'boxplot.png'
+    output_folder = "plots"
+    os.makedirs(output_folder, exist_ok=True)
+    plt.savefig(f"{output_folder}/boxplot.png")
+
     plt.show()
+    plt.close()
+
+
+def statistical_test(gains_ea1, gains_ea2, enemies):
+    results = []
+
+    for enemy in enemies:
+        # Gather data for each enemy
+        data_ea1 = gains_ea1[enemy]
+        data_ea2 = gains_ea2[enemy]
+
+        # Perform t-test
+        t_stat, p_value = stats.ttest_ind(data_ea1, data_ea2)
+
+        # Calculate means and 95% confidence intervals
+        mean_ea1 = np.mean(data_ea1)
+        mean_ea2 = np.mean(data_ea2)
+
+        ci_ea1 = stats.t.interval(0.95, len(data_ea1)-1, loc=mean_ea1, scale=stats.sem(data_ea1))
+        ci_ea2 = stats.t.interval(0.95, len(data_ea2)-1, loc=mean_ea2, scale=stats.sem(data_ea2))
+
+        results.append({
+            'Enemy': enemy,
+            'Mean EA1': mean_ea1,
+            'Mean EA2': mean_ea2,
+            'T-Statistic': t_stat,
+            'P-Value': p_value,
+            '95% CI EA1': ci_ea1,
+            '95% CI EA2': ci_ea2,
+            'Significant Difference': p_value < 0.05  # True if significant
+        })
+
+    # Convert results to a DataFrame for better readability
+    results_df = pd.DataFrame(results)
+
+    return results_df
+
 
 def main():
     enemies = [2, 5, 8]  # List of enemies to test
@@ -60,6 +128,7 @@ def main():
                               player_controller=player_controller(n_hidden_neurons),
                               speed="fastest",
                               enemymode="static",
+                              randomini="yes",
                               level=2,
                               visuals=False)
 
@@ -83,6 +152,11 @@ def main():
 
     # Create the boxplots
     plot_boxplots(gains_ea1, gains_ea2, enemies)
+
+    # Perform statistical tests and display results
+    statistical_results = statistical_test(gains_ea1, gains_ea2, enemies)
+    print(statistical_results)
+
 
 if __name__ == '__main__':
     main()

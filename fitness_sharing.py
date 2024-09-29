@@ -1,9 +1,15 @@
-###############################################################################
-# EvoMan FrameWork - V1.0 2016  			                                  #
-# DEMO : Neuroevolution - Genetic Algorithm  neural network.                  #
-# Author: Karine Miras        			                                      #
-# karine.smiras@gmail.com     				                                  #
-###############################################################################
+"""
+Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
+
+Description: This file implements the fitness sharing evolutionary algorithm.
+This is a modified version of the EA1 algorithm that includes fitness sharing
+to encourage diversity in the population. The EA1 algorithm is modified to
+include a sharing function that calculates the portion of fitness that one
+should get based on the distance between the individuals. This sharing function
+is then applied directly into the fitness to encourage diversity in the
+population. The EA1 algorithm is then run with the fitness sharing mechanism
+to compare the results with the standard EA1 algorithm.
+"""
 
 # imports framework
 import sys
