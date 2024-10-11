@@ -26,9 +26,12 @@ if not os.path.exists(experiment_name):
 # Update the number of neurons for this specific example
 n_hidden_neurons = 10
 
+folder_name = 'best_solutions'
+
 # Load the best solution from a file
-def load_best_solution(ea, enemy):
-    directory = f"final_best_solutions/{ea}/{enemy}/"
+def load_best_solution(ea, enemies):
+    enemies_name = ''.join(str(e) for e in enemies)
+    directory = f"{folder_name}/{ea}/{enemies_name}/"
     filename = f"{directory}solution_with_fitness.npz"
 
     if os.path.exists(filename):
@@ -112,14 +115,20 @@ def statistical_test(gains_ea1, gains_ea2, enemies):
 
 
 def main():
-    enemies = [2, 5, 8]  # List of enemies to test
+    trained_enemies = [2, 5, 8]
+    enemies = [i for i in range(1, 9)]  # all enemies
     gains_ea1 = {enemy: [] for enemy in enemies}  # To store gains for EA1
     gains_ea2 = {enemy: [] for enemy in enemies}  # To store gains for EA2
 
+    enemies = range(1, 9) # List of enemies to test agianst
+
+    no_runs = 1
+
     for ea in ['EA1', 'EA2']:
+    # for ea in ['EA1']:
         for enemy in enemies:
             # Load the weights from the file
-            best_weights, score = load_best_solution(ea, enemy)
+            best_weights, score = load_best_solution(ea, trained_enemies)
 
             # Initializes environment for single objective mode (specialist) with static enemy and AI player
             env = Environment(experiment_name=experiment_name,
@@ -128,13 +137,12 @@ def main():
                               player_controller=player_controller(n_hidden_neurons),
                               speed="fastest",
                               enemymode="static",
-                              randomini="yes",
                               level=2,
                               visuals=False)
 
             # Run the solution 5 times for each enemy
             gains = []
-            for run in range(5):
+            for run in range(no_runs):
                 # Play and get the results
                 fitness, player_life, enemy_life, _ = env.play(best_weights)
 
@@ -150,12 +158,20 @@ def main():
             else:
                 gains_ea2[enemy] = gains
 
-    # Create the boxplots
-    plot_boxplots(gains_ea1, gains_ea2, enemies)
+    # # Create the boxplots
+    # plot_boxplots(gains_ea1, gains_ea2, enemies)
 
-    # Perform statistical tests and display results
-    statistical_results = statistical_test(gains_ea1, gains_ea2, enemies)
-    print(statistical_results)
+    # # Perform statistical tests and display results
+    # statistical_results = statistical_test(gains_ea1, gains_ea2, enemies)
+
+    if gains_ea1:
+        print(gains_ea1.values())
+        print(f'EA1 total gain agianst enemies: {list(enemies)} = {sum([sum(el) for el in gains_ea1.values()])}')
+    if gains_ea2:
+        print(gains_ea2.values())
+        print(f'EA2 total gain agianst enemies: {list(enemies)} = {sum([sum(el) for el in gains_ea2.values()])}')
+
+    # print(statistical_results)
 
 
 if __name__ == '__main__':
