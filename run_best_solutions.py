@@ -23,7 +23,7 @@ experiment_name = 'boxplots'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
-# Update the number of neurons for this specific example
+# Update the number of neurons for this specific exampleload_best_solution
 n_hidden_neurons = 10
 
 folder_name = 'best_solutions'

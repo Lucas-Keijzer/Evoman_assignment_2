@@ -21,6 +21,9 @@ from demo_controller import player_controller
 import numpy as np
 import os
 
+# file utils
+from file_utils import save_best_solution, save_fitness_stats_to_csv
+
 # standard offensive strategy first
 gamma = 0.9
 beta = 0.1
@@ -64,8 +67,9 @@ class EA:
         self.population = self.initialize_population()
         self.fitness_population = self.evaluate_population()
 
-        # Load the best solution (if available) and its fitness
-        self.best_solution, self.best_solution_fitness = self.load_best_solution()
+        # Initialise the best solution and fitness to negative infinity
+        self.best_solution = None
+        self.best_solution_fitness = float('-inf')
 
         # Initialize list to store fitness statistics and variety per generation
         self.fitness_stats = []
@@ -74,19 +78,23 @@ class EA:
         if not os.path.exists("testdata"):
             os.makedirs("testdata")
 
+    # Initialize the population with random values
     def initialize_population(self):
         return np.random.uniform(self.lower_bound, self.upper_bound, (self.population_size,
                                                                       self.n_vars))
 
+    # Clamp the individual to the bounds
     def clamp(self, individual):
         return np.clip(individual, self.lower_bound, self.upper_bound)
 
+    # Perform tournament selection to select a parent
     def tournament_selection(self, fitness_population):
         selected_indices = np.random.randint(0, self.population.shape[0], self.tournament_size)
         selected_fitness = fitness_population[selected_indices]
         best_index = np.argmax(selected_fitness)
         return self.population[selected_indices[best_index]]
 
+    # Perform blend crossover for two parents
     def crossover_single(self, parent1, parent2):
         offspring = np.zeros_like(parent1)
 
@@ -103,12 +111,14 @@ class EA:
 
         return self.clamp(offspring)
 
+    # mutates an individual by adding a random value from a normal distribution
     def mutate_individual(self, individual):
         for i in range(len(individual)):
             individual[i] += np.random.normal(0, self.mutation_std)
 
         return self.clamp(individual)
 
+    # evaluates the population
     def evaluate_population(self):
         return np.array([self.simulation(individual) for individual in self.population])
 
@@ -142,44 +152,8 @@ class EA:
     def store_fitness_stats(self, generation, max_fitness, mean_fitness, std_fitness, variety):
         self.fitness_stats.append([generation, max_fitness, mean_fitness, std_fitness, variety])
 
-    # Save fitness statistics to a CSV file
-    def save_fitness_stats_to_csv(self):
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        enemies_name = ''.join(str(e) for e in self.enemies)
-
-        # Define the path for the CSV file
-        csv_path = f"testdata/{EA_NAME}/{enemies_name}"
-        os.makedirs(csv_path, exist_ok=True)
-        csv_filename = f"{csv_path}/fitness_stats_enemy{enemies_name}_{timestamp}.csv"
-
-        # Write the fitness statistics to a CSV file
-        with open(csv_filename, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["Generation", "Max Fitness", "Mean Fitness", "Std Fitness", "Variety"])
-            writer.writerows(self.fitness_stats)
-
-        print(f"Fitness statistics saved to {csv_filename}")
-
-    # Load the best solution weights from a file
-    def load_best_solution(self):
-        # turn the list of enemies to string format for filename storage
-        enemies_name = ''.join(str(e) for e in self.enemies)
-
-        directory = f"best_solutions/{str(EA_NAME)}/{enemies_name}/"
-        filename = f"{directory}solution_with_fitness.npz"
-
-        if os.path.exists(filename):
-            data = np.load(filename)
-            best_solution = data['weights']
-            best_solution_fitness = data['fitness']
-            print(f"Loaded best solution with fitness: {best_solution_fitness} from {filename}")
-            return best_solution, best_solution_fitness
-        else:
-            # No solution saved yet, initialize with an empty solution and very bad fitness
-            return None, float('-inf')
-
     # Save the best solution weights to a file
-    def save_best_solution(self, best_solution, best_solution_fitness):
+    def save_best_solution_deprecated(self, best_solution, best_solution_fitness):
         # turn the list of enemies to string format for filename storage
         enemies_name = ''.join(str(e) for e in self.enemies)
 
@@ -222,7 +196,7 @@ class EA:
 
                 # replace the oldest individual with the offspring
                 self.population[i_replace] = offspring
-                
+
                 # add 1 to all ages and set the age of the replaced individual to 0
                 ages += 1
                 ages[i_replace] = 0
@@ -245,30 +219,19 @@ class EA:
             if generation_max_fitness > self.best_solution_fitness:
                 self.best_solution = self.population[np.argmax(fitness_population)]
                 self.best_solution_fitness = generation_max_fitness
-                self.save_best_solution(self.best_solution, self.best_solution_fitness)
 
-            print(f"{generation + 1}/{self.no_generations}, max: {generation_max_fitness}, mean: ",
-                  f"{generation_mean_fitness}, std: {generation_std_fitness}, diversity: ",
-                  f"{generation_variety}")
-
-        # Final evaluation and results
-        fitness_population = self.evaluate_population()  # Evaluate final population
-        generation_max_fitness = np.max(fitness_population)
-        if generation_max_fitness > self.best_solution_fitness:
-            self.best_solution = self.population[np.argmax(fitness_population)]
-            self.best_solution_fitness = generation_max_fitness
-            self.save_best_solution(self.best_solution, self.best_solution_fitness)
-
-        print(f"Final Generation: max: {best_solution_fitness}, mean: ",
-              f"{np.mean(fitness_population)}, std: {np.std(fitness_population)}, diversity: ",
-              f"{self.calculate_diversity()}")
-        print("Best Fitness:", self.best_solution_fitness)
+            print(f"{generation + 1}/{self.no_generations},"
+                  f"max: {round(generation_max_fitness, 1)}, "
+                  f"mean: {round(generation_mean_fitness, 1)}, "
+                  f"std: {round(generation_std_fitness, 1)}, "
+                  f"diversity: {round(generation_variety, 1)}")
 
         # Save the best solution weights to a file
-        np.save('best_solution_weights.npy', best_solution)
+        save_best_solution(self.best_solution, self.best_solution_fitness, self.enemies, EA_NAME)
 
         # Save the fitness statistics to a CSV file
-        self.save_fitness_stats_to_csv()
+        save_fitness_stats_to_csv(self.fitness_stats, self.enemies, EA_NAME)
+
 
 
 def main():
@@ -298,7 +261,7 @@ def main():
 
     # EA configuration
     population_size = 130
-    # population_size = 10  # for now for testing
+    population_size = 10  # for now for testing
     no_generations = 30
     upper_bound = 1
     lower_bound = -1
@@ -314,7 +277,7 @@ def main():
     # test group
     enemies = [2, 5, 8]
 
-    for run in range(1):
+    for run in range(10):
         print(f"Running EA with enemies {enemies}, run {run + 1}")
         # Initialize the EA object
         ea = EA(population_size=population_size,
