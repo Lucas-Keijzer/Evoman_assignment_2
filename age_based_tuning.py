@@ -35,13 +35,17 @@ EA_NAME = 'EA2'
 class CustomEnvironment(Environment):
     def fitness_single(self):
         time_score = 0
+        kill_bonus = 0
 
         if self.get_playerlife() <= 0:
             time_score = np.log(self.get_time())
         else:
             time_score = -np.log(self.get_time())
+        
+        if self.get_enemylife() <= 0:
+            kill_bonus = 100
 
-        return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score
+        return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score + kill_bonus
 
 
 # EA class for running the evolutionary algorithm
@@ -90,7 +94,7 @@ class EA:
 
     # Perform tournament selection to select a parent
     def tournament_selection(self, fitness_population):
-        selected_indices = np.random.randint(0, self.population.shape[0], self.tournament_size)
+        selected_indices = np.random.choice(self.population.shape[0], self.tournament_size, replace=False)
         selected_fitness = fitness_population[selected_indices]
         best_index = np.argmax(selected_fitness)
         return self.population[selected_indices[best_index]]
@@ -184,6 +188,9 @@ class EA:
                 # Select two parents using tournament selection
                 p1 = self.tournament_selection(fitness_population)
                 p2 = self.tournament_selection(fitness_population)
+                # ensure different p1 and p2
+                while np.array_equal(p1, p2):
+                    p2 = self.tournament_selection(fitness_population)
 
                 # Perform crossover to produce offspring
                 offspring = self.crossover_single(p1, p2)
@@ -366,7 +373,7 @@ def run_optuna_study(n_trials=2):
     print("Study results saved to SQLite database.")
 
 if __name__ == "__main__":
-    run_optuna_study(n_trials=5)  # Set the number of trials (iterations)
+    run_optuna_study(n_trials=2)  # Set the number of trials (iterations)
 
     # env = CustomEnvironment(experiment_name=experiment_name,
     #                         enemies=[1],
