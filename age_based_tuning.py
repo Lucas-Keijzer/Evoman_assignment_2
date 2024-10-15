@@ -12,6 +12,7 @@ to compare the results with the standard EA1 algorithm.
 """
 
 # imports framework
+import optuna
 import time
 import csv
 from evoman.environment import Environment
@@ -239,67 +240,166 @@ class EA:
         # Save the fitness statistics to a CSV file
         save_fitness_stats_to_csv(self.fitness_stats, self.enemies, EA_NAME)
 
+class HyperparameterTuner:
+    def __init__(self, env, enemy, num_searches):
+        self.env = env
+        self.enemy = enemy
+        self.num_searches = num_searches
 
+    # Define the search space for the hyperparameters
+    def random_search_space(self):
+        search_space = {
+            "population_size": [50, 100, 200],
+            "crossover_rate": [0.6, 0.7, 0.8],
+            "mutation_rate": [0.05, 0.1, 0.2],
+            "mutation_std": [0.1, 0.3, 0.5],
+            "alpha": [0.1, 0.5, 0.9],
+            "tournament_size": [3, 5, 7],
+            "no_generations": [10, 20, 50]
+        }
 
-def main():
-    # choose this for not using visuals and thus making experiments faster
-    headless = True
-    if headless:
-        os.environ["SDL_VIDEODRIVER"] = "dummy"
+        # Randomly sample from the search space for `num_searches` trials
+        random_configs = []
+        for _ in range(self.num_searches):
+            config = {param: np.random.choice(values) for param, values in search_space.items()}
+            random_configs.append(config)
 
-    experiment_name = 'optimization_test'
-    if not os.path.exists(experiment_name):
-        os.makedirs(experiment_name)
+        return random_configs
 
+    def tune(self):
+        # Generate random configurations
+        configurations = self.random_search_space()
+
+        best_fitness = float('-inf')
+        best_config = None
+
+        # Run EA for each configuration
+        for config in configurations:
+            print(f"Testing configuration: {config}")
+            
+            # Create the EA instance with the current hyperparameter configuration
+            ea = EA(
+                population_size=config["population_size"],
+                n_vars=(self.env.get_num_sensors() + 1) * 10 + (10 + 1) * 5,  # Assuming 10 hidden neurons
+                upper_bound=1,
+                lower_bound=-1,
+                crossover_rate=config["crossover_rate"],
+                mutation_rate=config["mutation_rate"],
+                mutation_std=config["mutation_std"],
+                tournament_size=config["tournament_size"],
+                alpha=config["alpha"],
+                env=self.env,
+                no_generations=config["no_generations"],
+                enemy=self.enemy
+            )
+
+            # Run the EA
+            ea.run()
+
+            # Check if this configuration produced a better result
+            if ea.best_solution_fitness > best_fitness:
+                best_fitness = ea.best_solution_fitness
+                best_config = config
+                print(f"New best config: {best_config} with fitness: {best_fitness}")
+
+        print("Best hyperparameter configuration found:")
+        print(best_config)
+        print(f"Best fitness achieved: {best_fitness}")
+
+        
+def objective(trial):
+    # Define the search space for hyperparameters
+    population_size = trial.suggest_int('population_size', 50, 200, step=2)  # Range of population size
+    crossover_rate = trial.suggest_float('crossover_rate', 0.5, 0.9)  # Range of crossover rate
+    mutation_rate = trial.suggest_float('mutation_rate', 0.05, 0.3)  # Range of mutation rate
+    mutation_std = trial.suggest_float('mutation_std', 0.1, 0.6)  # Range of mutation standard deviation
+    alpha = trial.suggest_float('alpha', 0.1, 0.9)  # Range of blend crossover alpha
+    tournament_size = trial.suggest_int('tournament_size', 3, 10)  # Tournament size
+    no_generations = 10  # Number of generations
+
+    # Set up the environment
     n_hidden_neurons = 10
+    env = CustomEnvironment(
+        experiment_name='optimization_test',
+                        enemies=[1],
+                        multiplemode="yes",
+                        playermode="ai",
+                        player_controller=player_controller(n_hidden_neurons),
+                        enemymode="static",
+                        level=2,
+                        speed="fastest",
+                        visuals=False)
 
-    # Initializes simulation in individual evolution mode, for single static enemy.
-    env = CustomEnvironment(experiment_name=experiment_name,
-                            enemies=[1],
-                            multiplemode="yes",
-                            playermode="ai",
-                            player_controller=player_controller(n_hidden_neurons),
-                            enemymode="static",
-                            level=2,
-                            speed="fastest",
-                            visuals=False)
 
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
-    # EA configuration
-    population_size = 130
-    # population_size = 10  # for now for testing
-    no_generations = 30
-    upper_bound = 1
-    lower_bound = -1
-    crossover_rate = 0.9
-    alpha = 0.75
-    mutation_rate = 0.22
-    mutation_std = 0.45
-    tournament_size = 7
+    # Initialize the EA object with the sampled hyperparameters
+    ea = EA(
+        population_size=population_size,
+        n_vars=n_vars,
+        upper_bound=1,
+        lower_bound=-1,
+        crossover_rate=crossover_rate,
+        mutation_rate=mutation_rate,
+        mutation_std=mutation_std,
+        tournament_size=tournament_size,
+        alpha=alpha,
+        env=env,
+        no_generations=no_generations,
+        enemies=[1,2,5]  # Optimize for enemy 2
+    )
 
-    enemy_groups = [[1, 2, 5], [7, 8]]
+    # Run the evolutionary algorithm and get the best fitness
+    ea.run()
 
-    for enemies in enemy_groups:
-        for run in range(1):
-            print(f"Running EA with enemies {enemies}, run {run + 1}")
-            # Initialize the EA object
-            ea = EA(population_size=population_size,
-                    n_vars=n_vars,
-                    upper_bound=upper_bound,
-                    lower_bound=lower_bound,
-                    crossover_rate=crossover_rate,
-                    mutation_rate=mutation_rate,
-                    mutation_std=mutation_std,
-                    tournament_size=tournament_size,
-                    alpha=alpha,
-                    env=env,
-                    no_generations=no_generations,
-                    enemies=enemies)
-
-            # Run the evolutionary algorithm
-            ea.run()
+    # Optuna maximizes by default, so we return the negative of fitness if we're minimizing
+    # return ea.best_solution_fitness  # Return the best fitness as the objective value
+    fitness_population = ea.evaluate_population()
+    max_fitness = np.max(fitness_population)
+    
+    return max_fitness
 
 
-if __name__ == '__main__':
-    main()
+# Function to execute the study
+def run_optuna_study(n_trials=2):
+    study_name = "optuna_crowding_max"
+    storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
+    
+    # Create or load an existing study from the SQLite database
+    study = optuna.create_study(study_name=study_name, direction="maximize", storage=storage_name, load_if_exists=True)
+    
+    study.optimize(objective, n_trials=n_trials)
+    
+    print("Study results saved to SQLite database.")
+
+if __name__ == "__main__":
+    run_optuna_study(n_trials=2)  # Set the number of trials (iterations)
+
+    # env = CustomEnvironment(experiment_name=experiment_name,
+    #                         enemies=[1],
+    #                         multiplemode="yes",
+    #                         playermode="ai",
+    #                         player_controller=player_controller(n_hidden_neurons),
+    #                         enemymode="static",
+    #                         level=2,
+    #                         speed="fastest",
+    #                         visuals=False)
+
+    # enemy_groups = [[1, 2, 5], [7, 8]]
+
+    # for enemies in enemy_groups:
+    #     for run in range(2):
+    #         print(f"Running EA with enemies {enemies}, run {run + 1}")
+    #         # Initialize the EA object
+    #         ea = EA(population_size=population_size,
+    #                 n_vars=n_vars,
+    #                 upper_bound=upper_bound,
+    #                 lower_bound=lower_bound,
+    #                 crossover_rate=crossover_rate,
+    #                 mutation_rate=mutation_rate,
+    #                 mutation_std=mutation_std,
+    #                 tournament_size=tournament_size,
+    #                 alpha=alpha,
+    #                 env=env,
+    #                 no_generations=no_generations,
+    #                 enemies=enemies

@@ -34,13 +34,17 @@ EA_NAME = 'EA1'
 class CustomEnvironment(Environment):
     def fitness_single(self):
         time_score = 0
+        kill_bonus = 0
 
         if self.get_playerlife() <= 0:
             time_score = np.log(self.get_time())
         else:
             time_score = -np.log(self.get_time())
+        
+        if self.get_enemylife() <= 0:
+            kill_bonus = 100
 
-        return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score
+        return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score + kill_bonus
 
 
 # EA class for running the evolutionary algorithm
