@@ -40,7 +40,7 @@ class CustomEnvironment(Environment):
             time_score = np.log(self.get_time())
         else:
             time_score = -np.log(self.get_time())
-        
+
         if self.get_enemylife() <= 0:
             kill_bonus = 100
 
@@ -246,6 +246,7 @@ def main():
                             level=2,
                             speed="fastest",
                             visuals=False)
+    n_input_nodes = env.get_num_sensors()
 
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
