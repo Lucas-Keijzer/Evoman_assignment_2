@@ -117,7 +117,7 @@ def main():
 
                 # Load the weights from the file
                 folder_path = f'{folder_name}/{ea}/{enemies_folder}'
-                file_name = os.listdir(folder_path)[-1]
+                file_name = os.listdir(folder_path)[-3]
                 file_path = os.path.join(folder_path, file_name)
 
                 weights = np.loadtxt(file_path)
