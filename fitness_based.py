@@ -14,6 +14,8 @@ to compare the results with the standard EA1 algorithm.
 # imports framework
 import time
 import csv
+import itertools
+
 from evoman.environment import Environment
 from demo_controller import player_controller
 
@@ -267,12 +269,29 @@ def main():
     # test groups
     enemy_groups = [[1, 2, 3, 5, 8]]
     enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
+    # List of 8 enemies
+    enemies = [1, 2, 3, 4, 5, 6, 7, 8]
+
+    # Generate all combinations of 3 enemies out of 8
+    enemy_combinations = list(itertools.combinations(enemies, 3))
+
+    # Select the first half of the combinations
+    first_half_enemy_combinations = enemy_combinations[:len(enemy_combinations) // 2]
+
+    # Calculate the number of combinations in each quartile
+    quartile_size = len(first_half_enemy_combinations) // 4
+
+    # Divide the first half into four quartiles
+    quartile_1 = first_half_enemy_combinations[:quartile_size]
+    quartile_2 = first_half_enemy_combinations[quartile_size:2 * quartile_size]
+    quartile_3 = first_half_enemy_combinations[2 * quartile_size:3 * quartile_size]
+    quartile_4 = first_half_enemy_combinations[3 * quartile_size:]
 
     # enemy_groups = [[1]]
 
     for enemies in enemy_groups:
         print(f"Running EA with enemies {enemies}")
-        for run in range(1):
+        for run in range(15):
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,
