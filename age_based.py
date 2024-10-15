@@ -89,7 +89,7 @@ class EA:
 
     # Perform tournament selection to select a parent
     def tournament_selection(self, fitness_population):
-        selected_indices = np.random.randint(0, self.population.shape[0], self.tournament_size)
+        selected_indices = np.random.choice(self.population.shape[0], self.tournament_size, replace=False)
         selected_fitness = fitness_population[selected_indices]
         best_index = np.argmax(selected_fitness)
         return self.population[selected_indices[best_index]]
@@ -182,7 +182,9 @@ class EA:
             for i in range(self.population_size):
                 # Select two parents using tournament selection
                 p1 = self.tournament_selection(fitness_population)
-                p2 = self.tournament_selection(fitness_population)
+                # ensure different p1 and p2
+                while np.array_equal(p1, p2):
+                    p2 = self.tournament_selection(fitness_population)
 
                 # Perform crossover to produce offspring
                 offspring = self.crossover_single(p1, p2)
@@ -288,8 +290,7 @@ def main():
                     alpha=alpha,
                     env=env,
                     no_generations=no_generations,
-                    enemies=enemies
-                )
+                    enemies=enemies)
 
             # Run the evolutionary algorithm
             ea.run()
