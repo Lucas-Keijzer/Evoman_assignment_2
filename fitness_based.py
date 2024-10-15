@@ -146,17 +146,12 @@ class EA:
 
     # The main evolutionary algorithm loop is now inside the run method
     def run(self):
-        best_solution = None
-        best_solution_fitness = float('-inf')
-
-        # random permutation of the population size:
-        ages = np.random.permutation(self.population_size)
-
         # Go for the set amount of generations
         for generation in range(self.no_generations):
 
             # get the fitness of the population
             fitness_population = self.fitness_population
+            next_generation = []
 
             # Make new offspring until we have a new full generation
             for i in range(self.population_size):
@@ -171,18 +166,19 @@ class EA:
                 if np.random.uniform(0, 1) < self.mutation_rate:
                     offspring = self.mutate_individual(offspring)
 
-                # age based replacement: pick the oldest individual and replace it
-                i_replace = np.argmax(ages)
+                next_generation.append(offspring)
 
-                # replace the oldest individual with the offspring
-                self.population[i_replace] = offspring
+            # get the evaluation of the new generation
+            next_generation_fitness = np.array([self.simulation(individual) for individual in next_generation])
 
-                # add 1 to all ages and set the age of the replaced individual to 0
-                ages += 1
-                ages[i_replace] = 0
+            # stack both the generations pick the population size best individuals
+            self.population = np.vstack((self.population, next_generation))
+            self.fitness_population = np.hstack((self.fitness_population, next_generation_fitness))
 
-                # update the fitness of the replaced individual
-                fitness_population[i_replace] = self.simulation(offspring)
+            # pick the population size best individuals
+            indices = np.argsort(self.fitness_population)[-self.population_size:]
+            self.population = self.population[indices]
+            self.fitness_population = self.fitness_population[indices]
 
             # Calculate fitness statistics
             generation_max_fitness = np.max(fitness_population)
@@ -255,27 +251,28 @@ def main():
 
     # test groups
     enemy_groups = [[1], [2], [3], [4], [5], [6], [7], [8]]
+    enemies = [1]
 
-    for enemies in enemy_groups:
-        print(f"Running EA with enemies {enemies}")
-        for run in range(1):
-            print(f"Running EA with enemies {enemies}, run {run + 1}")
-            # Initialize the EA object
-            ea = EA(population_size=population_size,
-                    n_vars=n_vars,
-                    upper_bound=upper_bound,
-                    lower_bound=lower_bound,
-                    crossover_rate=crossover_rate,
-                    mutation_rate=mutation_rate,
-                    mutation_std=mutation_std,
-                    tournament_size=tournament_size,
-                    alpha=alpha,
-                    env=env,
-                    no_generations=no_generations,
-                    enemies=enemies)
+    # for enemies in enemy_groups:
+    #     print(f"Running EA with enemies {enemies}")
+    for run in range(1):
+        print(f"Running EA with enemies {enemies}, run {run + 1}")
+        # Initialize the EA object
+        ea = EA(population_size=population_size,
+                n_vars=n_vars,
+                upper_bound=upper_bound,
+                lower_bound=lower_bound,
+                crossover_rate=crossover_rate,
+                mutation_rate=mutation_rate,
+                mutation_std=mutation_std,
+                tournament_size=tournament_size,
+                alpha=alpha,
+                env=env,
+                no_generations=no_generations,
+                enemies=enemies)
 
-            # Run the evolutionary algorithm
-            ea.run()
+        # Run the evolutionary algorithm
+        ea.run()
 
 
 if __name__ == '__main__':
