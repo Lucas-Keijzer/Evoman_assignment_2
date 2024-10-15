@@ -224,7 +224,7 @@ def main():
     # Initializes simulation in individual evolution mode, for single static enemy.
     env = CustomEnvironment(experiment_name=experiment_name,
                             enemies=[1],
-                            # multiplemode="yes",
+                            multiplemode="yes",
                             playermode="ai",
                             player_controller=player_controller(n_hidden_neurons),
                             enemymode="static",
@@ -267,8 +267,8 @@ def main():
                     alpha=alpha,
                     env=env,
                     no_generations=no_generations,
-                    enemies=enemies,
-                    multiplemode="yes")
+                    enemies=enemies
+                    )
 
             # Run the evolutionary algorithm
             ea.run()

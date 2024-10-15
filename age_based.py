@@ -288,8 +288,8 @@ def main():
                     alpha=alpha,
                     env=env,
                     no_generations=no_generations,
-                    enemies=enemies,
-                    multiplemode="yes")
+                    enemies=enemies
+                )
 
             # Run the evolutionary algorithm
             ea.run()
