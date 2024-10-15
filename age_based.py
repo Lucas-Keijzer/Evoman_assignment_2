@@ -277,7 +277,7 @@ def main():
     enemy_groups = [[1, 2, 5], [7, 8]]
 
     for enemies in enemy_groups:
-        for run in range(2):
+        for run in range(1):
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,

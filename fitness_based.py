@@ -258,7 +258,7 @@ def main():
 
     for enemies in enemy_groups:
         print(f"Running EA with enemies {enemies}")
-        for run in range(2):
+        for run in range(1):
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,
