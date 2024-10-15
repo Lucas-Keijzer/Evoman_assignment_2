@@ -267,7 +267,8 @@ def main():
                     alpha=alpha,
                     env=env,
                     no_generations=no_generations,
-                    enemies=enemies)
+                    enemies=enemies,
+                    multiplemode="yes")
 
             # Run the evolutionary algorithm
             ea.run()
