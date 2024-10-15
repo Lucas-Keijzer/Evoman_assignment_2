@@ -182,6 +182,7 @@ class EA:
             for i in range(self.population_size):
                 # Select two parents using tournament selection
                 p1 = self.tournament_selection(fitness_population)
+                p2 = self.tournament_selection(fitness_population)
                 # ensure different p1 and p2
                 while np.array_equal(p1, p2):
                     p2 = self.tournament_selection(fitness_population)

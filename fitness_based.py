@@ -157,6 +157,7 @@ class EA:
             for i in range(self.population_size):
                 # Select two parents using tournament selection
                 p1 = self.tournament_selection(fitness_population)
+                p2 = self.tournament_selection(fitness_population)
                 # ensure different p1 and p2
                 while np.array_equal(p1, p2):
                     p2 = self.tournament_selection(fitness_population)
@@ -226,7 +227,7 @@ def main():
     # Initializes simulation in individual evolution mode, for single static enemy.
     env = CustomEnvironment(experiment_name=experiment_name,
                             enemies=[1],
-                            multiplemode="yes",
+                            # multiplemode="yes",
                             playermode="ai",
                             player_controller=player_controller(n_hidden_neurons),
                             enemymode="static",
@@ -252,6 +253,8 @@ def main():
 
     # test groups
     enemy_groups = [[1, 2, 5], [7, 8]]
+
+    # enemy_groups = [[1]]
 
     for enemies in enemy_groups:
         print(f"Running EA with enemies {enemies}")
