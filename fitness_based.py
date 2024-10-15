@@ -146,70 +146,78 @@ class EA:
 
     # The main evolutionary algorithm loop is now inside the run method
     def run(self):
-        # Go for the set amount of generations
-        for generation in range(self.no_generations):
+        try:
+            # Go for the set amount of generations
+            for generation in range(self.no_generations):
 
-            # get the fitness of the population
-            fitness_population = self.fitness_population
-            next_generation = []
+                # get the fitness of the population
+                fitness_population = self.fitness_population
+                next_generation = []
 
-            # Make new offspring until we have a new full generation
-            for i in range(self.population_size):
-                # Select two parents using tournament selection
-                p1 = self.tournament_selection(fitness_population)
-                p2 = self.tournament_selection(fitness_population)
-                # ensure different p1 and p2
-                while np.array_equal(p1, p2):
+                # Make new offspring until we have a new full generation
+                for i in range(self.population_size):
+                    # Select two parents using tournament selection
+                    p1 = self.tournament_selection(fitness_population)
                     p2 = self.tournament_selection(fitness_population)
+                    # ensure different p1 and p2
+                    while np.array_equal(p1, p2):
+                        p2 = self.tournament_selection(fitness_population)
 
-                # Perform crossover to produce offspring
-                offspring = self.crossover_single(p1, p2)
+                    # Perform crossover to produce offspring
+                    offspring = self.crossover_single(p1, p2)
 
-                # Mutate offspring
-                if np.random.uniform(0, 1) < self.mutation_rate:
-                    offspring = self.mutate_individual(offspring)
+                    # Mutate offspring
+                    if np.random.uniform(0, 1) < self.mutation_rate:
+                        offspring = self.mutate_individual(offspring)
 
-                next_generation.append(offspring)
+                    next_generation.append(offspring)
 
-            # get the evaluation of the new generation
-            next_generation_fitness = np.array([self.simulation(individual) for individual in next_generation])
+                # get the evaluation of the new generation
+                next_generation_fitness = np.array([self.simulation(individual) for individual in next_generation])
 
-            # stack both the generations pick the population size best individuals
-            self.population = np.vstack((self.population, next_generation))
-            self.fitness_population = np.hstack((self.fitness_population, next_generation_fitness))
+                # stack both the generations pick the population size best individuals
+                self.population = np.vstack((self.population, next_generation))
+                self.fitness_population = np.hstack((self.fitness_population, next_generation_fitness))
 
-            # pick the population size best individuals
-            indices = np.argsort(self.fitness_population)[-self.population_size:]
-            self.population = self.population[indices]
-            self.fitness_population = self.fitness_population[indices]
+                # pick the population size best individuals
+                indices = np.argsort(self.fitness_population)[-self.population_size:]
+                self.population = self.population[indices]
+                self.fitness_population = self.fitness_population[indices]
 
-            # Calculate fitness statistics
-            generation_max_fitness = np.max(fitness_population)
-            generation_mean_fitness = np.mean(fitness_population)
-            generation_std_fitness = np.std(fitness_population)
-            generation_variety = self.calculate_diversity()
+                # Calculate fitness statistics
+                generation_max_fitness = np.max(fitness_population)
+                generation_mean_fitness = np.mean(fitness_population)
+                generation_std_fitness = np.std(fitness_population)
+                generation_variety = self.calculate_diversity()
 
-            # Store fitness statistics and diversity for this generation
-            self.store_fitness_stats(generation + 1, generation_max_fitness,
-                                     generation_mean_fitness, generation_std_fitness,
-                                     generation_variety)
+                # Store fitness statistics and diversity for this generation
+                self.store_fitness_stats(generation + 1, generation_max_fitness,
+                                        generation_mean_fitness, generation_std_fitness,
+                                        generation_variety)
 
-            # Log the best fitness for monitoring
-            if generation_max_fitness > self.best_solution_fitness:
-                self.best_solution = self.population[np.argmax(fitness_population)]
-                self.best_solution_fitness = generation_max_fitness
+                # Log the best fitness for monitoring
+                if generation_max_fitness > self.best_solution_fitness:
+                    self.best_solution = self.population[np.argmax(fitness_population)]
+                    self.best_solution_fitness = generation_max_fitness
 
-            print(f"{generation + 1}/{self.no_generations}, "
-                  f"max: {round(generation_max_fitness, 1)}, "
-                  f"mean: {round(generation_mean_fitness, 1)}, "
-                  f"std: {round(generation_std_fitness, 1)}, "
-                  f"diversity: {round(generation_variety, 1)}")
+                print(f"{generation + 1}/{self.no_generations}, "
+                    f"max: {round(generation_max_fitness, 1)}, "
+                    f"mean: {round(generation_mean_fitness, 1)}, "
+                    f"std: {round(generation_std_fitness, 1)}, "
+                    f"diversity: {round(generation_variety, 1)}")
 
-        # Save the best solution to a file using file_utils.py
-        save_best_solution(self.best_solution, self.best_solution_fitness, self.enemies, EA_NAME)
+        except (KeyboardInterrupt, Exception) as e:
+            print(f"\nInterrupted by {type(e).__name__}: {str(e)}")
+            print("Saving the best solution found so far...")
 
-        # Save fitness statistics to CSV using file_utils.py
-        save_fitness_stats_to_csv(self.fitness_stats, self.enemies, EA_NAME)
+        finally:
+            # Save the best solution to a file using file_utils.py
+            save_best_solution(self.best_solution, self.best_solution_fitness, self.enemies, EA_NAME)
+
+            # Save fitness statistics to CSV using file_utils.py
+            save_fitness_stats_to_csv(self.fitness_stats, self.enemies, EA_NAME)
+
+            print("Best solution and fitness statistics saved.")
 
 
 def main():
@@ -227,7 +235,7 @@ def main():
     # Initializes simulation in individual evolution mode, for single static enemy.
     env = CustomEnvironment(experiment_name=experiment_name,
                             enemies=[1],
-                            # multiplemode="yes",
+                            multiplemode="yes",
                             playermode="ai",
                             player_controller=player_controller(n_hidden_neurons),
                             enemymode="static",
@@ -252,7 +260,7 @@ def main():
     # enemies = [1]
 
     # test groups
-    enemy_groups = [[1, 2, 5], [7, 8]]
+    enemy_groups = [[1, 2, 3, 5, 8]]
 
     # enemy_groups = [[1]]
 
