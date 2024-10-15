@@ -105,7 +105,7 @@ def main():
     all_enemies = range(1, 9) # List of enemies to test agianst
 
     enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
-    # enemy_groups = [[1, 2, 3, 5, 8]]
+    # enemy_groups = [[1, 2, 3, 5]]
 
     # for ea in ['EA1', 'EA2']:
     for ea in ['EA1']:
@@ -113,6 +113,7 @@ def main():
         for enemy in enemy_groups:
             enemies_folder = ''.join([str(enemy) for enemy in enemy])
             gains = []
+            lives = []
             for enemy in all_enemies:
 
                 # Load the weights from the file
@@ -138,6 +139,7 @@ def main():
                 # Calculate gain for this enemy
                 gain = player_life - enemy_life
                 gains.append(gain)
+                lives.append((player_life, enemy_life))
 
                 print(f"EA {ea}, Enemy {enemy}, Player Life: {player_life}, Enemy Life: {enemy_life}, Gain: {gain}")
             gainss.append(gains)
@@ -145,9 +147,9 @@ def main():
     print(gainss)
     for i, gains in enumerate(gainss):
         print({i + 1})
-        print(gains)
+        print(gainss)
         print(f'EA1 total gain agianst enemies: {list(all_enemies)} = {sum(gains)}')
-        print(f'EA1 beat enemies: {[(i + 1, el) for i, el in enumerate(gains) if el > 0]}')
+        print(f'EA1 beat enemies: {[(i + 1, pl) for i, (pl, el) in enumerate(lives) if el <=0]}')
 
 
 if __name__ == '__main__':
