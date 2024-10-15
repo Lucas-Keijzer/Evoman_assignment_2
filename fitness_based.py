@@ -246,33 +246,31 @@ def main():
     mutation_std = 0.45
     tournament_size = 7
 
-    # two 'random' groups of enemies for now
-    enemy_groups = [[2, 5, 8], [1, 6, 7]]
+    # enemies = [1]
 
     # test groups
-    enemy_groups = [[1], [2], [3], [4], [5], [6], [7], [8]]
-    enemies = [1]
+    enemy_groups = [[1, 2, 5], [7, 8]]
 
-    # for enemies in enemy_groups:
-    #     print(f"Running EA with enemies {enemies}")
-    for run in range(1):
-        print(f"Running EA with enemies {enemies}, run {run + 1}")
-        # Initialize the EA object
-        ea = EA(population_size=population_size,
-                n_vars=n_vars,
-                upper_bound=upper_bound,
-                lower_bound=lower_bound,
-                crossover_rate=crossover_rate,
-                mutation_rate=mutation_rate,
-                mutation_std=mutation_std,
-                tournament_size=tournament_size,
-                alpha=alpha,
-                env=env,
-                no_generations=no_generations,
-                enemies=enemies)
+    for enemies in enemy_groups:
+        print(f"Running EA with enemies {enemies}")
+        for run in range(2):
+            print(f"Running EA with enemies {enemies}, run {run + 1}")
+            # Initialize the EA object
+            ea = EA(population_size=population_size,
+                    n_vars=n_vars,
+                    upper_bound=upper_bound,
+                    lower_bound=lower_bound,
+                    crossover_rate=crossover_rate,
+                    mutation_rate=mutation_rate,
+                    mutation_std=mutation_std,
+                    tournament_size=tournament_size,
+                    alpha=alpha,
+                    env=env,
+                    no_generations=no_generations,
+                    enemies=enemies)
 
-        # Run the evolutionary algorithm
-        ea.run()
+            # Run the evolutionary algorithm
+            ea.run()
 
 
 if __name__ == '__main__':
