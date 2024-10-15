@@ -28,22 +28,6 @@ n_hidden_neurons = 10
 
 folder_name = 'best_solutions'
 
-# Load the best solution from a file
-def load_best_solution(ea, enemies):
-    enemies_name = ''.join(str(e) for e in enemies)
-    directory = f"{folder_name}/{ea}/{enemies_name}/"
-    filename = f"{directory}solution_with_fitness.npz"
-
-    if os.path.exists(filename):
-        data = np.load(filename)
-        best_solution = data['weights']
-        best_solution_fitness = data['fitness']
-        print(f"Loaded best solution with fitness: {best_solution_fitness} from {filename}")
-        return best_solution, best_solution_fitness
-    else:
-        # No solution saved yet, initialize with an empty solution and very bad fitness
-        return None, float('-inf')
-
 
 def plot_boxplots(gains_ea1, gains_ea2, enemies):
     fig, axes = plt.subplots(3, 1, figsize=(12, 18), sharey=True)  # sharey=True for shared y-axis
@@ -116,62 +100,53 @@ def statistical_test(gains_ea1, gains_ea2, enemies):
 
 def main():
     trained_enemies = [2, 5, 8]
-    enemies = [i for i in range(1, 9)]  # all enemies
-    gains_ea1 = {enemy: [] for enemy in enemies}  # To store gains for EA1
-    gains_ea2 = {enemy: [] for enemy in enemies}  # To store gains for EA2
 
-    enemies = range(1, 9) # List of enemies to test agianst
+    # enemies_folder = ''.join([str(enemy) for enemy in trained_enemies])
+    all_enemies = range(1, 9) # List of enemies to test agianst
 
-    no_runs = 1
+    enemy_groups = [[1], [2], [3], [4], [5], [6], [7], [8]]
 
-    for ea in ['EA1', 'EA2']:
-    # for ea in ['EA1']:
-        for enemy in enemies:
-            # Load the weights from the file
-            best_weights, score = load_best_solution(ea, trained_enemies)
-
-            # Initializes environment for single objective mode (specialist) with static enemy and AI player
-            env = Environment(experiment_name=experiment_name,
-                              playermode="ai",
-                              enemies=[enemy],
-                              player_controller=player_controller(n_hidden_neurons),
-                              speed="fastest",
-                              enemymode="static",
-                              level=2,
-                              visuals=False)
-
-            # Run the solution 5 times for each enemy
+    # for ea in ['EA1', 'EA2']:
+    for ea in ['EA1']:
+        gainss = []
+        for enemy in enemy_groups:
+            enemies_folder = ''.join([str(enemy) for enemy in enemy])
             gains = []
-            for run in range(no_runs):
+            for enemy in all_enemies:
+
+                # Load the weights from the file
+                folder_path = f'{folder_name}/{ea}/{enemies_folder}'
+                file_name = os.listdir(folder_path)[0]
+                file_path = os.path.join(folder_path, file_name)
+
+                weights = np.loadtxt(file_path)
+
+                # Initializes environment for single objective mode (specialist) with static enemy and AI player
+                env = Environment(experiment_name=experiment_name,
+                                playermode="ai",
+                                enemies=[enemy],
+                                player_controller=player_controller(n_hidden_neurons),
+                                speed="fastest",
+                                enemymode="static",
+                                level=2,
+                                visuals=False)
+
                 # Play and get the results
-                fitness, player_life, enemy_life, _ = env.play(best_weights)
+                fitness, player_life, enemy_life, _ = env.play(weights)
 
                 # Calculate gain for this enemy
                 gain = player_life - enemy_life
                 gains.append(gain)
 
-                print(f"EA {ea}, Enemy {enemy}, Run {run+1}: Player Life: {player_life}, Enemy Life: {enemy_life}, Gain: {gain}")
+                print(f"EA {ea}, Enemy {enemy}, Player Life: {player_life}, Enemy Life: {enemy_life}, Gain: {gain}")
+            gainss.append(gains)
 
-            # Store the gains for plotting
-            if ea == 'EA1':
-                gains_ea1[enemy] = gains
-            else:
-                gains_ea2[enemy] = gains
-
-    # # Create the boxplots
-    # plot_boxplots(gains_ea1, gains_ea2, enemies)
-
-    # # Perform statistical tests and display results
-    # statistical_results = statistical_test(gains_ea1, gains_ea2, enemies)
-
-    if gains_ea1:
-        print(gains_ea1.values())
-        print(f'EA1 total gain agianst enemies: {list(enemies)} = {sum([sum(el) for el in gains_ea1.values()])}')
-    if gains_ea2:
-        print(gains_ea2.values())
-        print(f'EA2 total gain agianst enemies: {list(enemies)} = {sum([sum(el) for el in gains_ea2.values()])}')
-
-    # print(statistical_results)
+    print(gainss)
+    for i, gains in enumerate(gainss):
+        print({i + 1})
+        print(gains)
+        print(f'EA1 total gain agianst enemies: {list(all_enemies)} = {sum(gains)}')
+        print(f'EA1 beat enemies: {[(i, el) for i, el in enumerate(gains) if el > 0]}')
 
 
 if __name__ == '__main__':

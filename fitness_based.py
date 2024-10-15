@@ -43,7 +43,6 @@ class CustomEnvironment(Environment):
         return gamma * (100 - self.get_enemylife()) + beta * self.get_playerlife() + time_score
 
 
-
 # EA class for running the evolutionary algorithm
 class EA:
     def __init__(self, population_size, n_vars, upper_bound, lower_bound,
@@ -201,7 +200,7 @@ class EA:
                 self.best_solution = self.population[np.argmax(fitness_population)]
                 self.best_solution_fitness = generation_max_fitness
 
-            print(f"{generation + 1}/{self.no_generations},"
+            print(f"{generation + 1}/{self.no_generations}, "
                   f"max: {round(generation_max_fitness, 1)}, "
                   f"mean: {round(generation_mean_fitness, 1)}, "
                   f"std: {round(generation_std_fitness, 1)}, "
@@ -229,7 +228,7 @@ def main():
     # Initializes simulation in individual evolution mode, for single static enemy.
     env = CustomEnvironment(experiment_name=experiment_name,
                             enemies=[1],
-                            multiplemode="yes",
+                            # multiplemode="yes",
                             playermode="ai",
                             player_controller=player_controller(n_hidden_neurons),
                             enemymode="static",
@@ -241,7 +240,7 @@ def main():
 
     # EA configuration
     population_size = 130
-    population_size = 10  # for now for testing
+    # population_size = 10  # for now for testing
     no_generations = 30
     upper_bound = 1
     lower_bound = -1
@@ -254,27 +253,29 @@ def main():
     # two 'random' groups of enemies for now
     enemy_groups = [[2, 5, 8], [1, 6, 7]]
 
-    # test group
-    enemies = [2, 5, 8]
+    # test groups
+    enemy_groups = [[1], [2], [3], [4], [5], [6], [7], [8]]
 
-    for run in range(10):
-        print(f"Running EA with enemies {enemies}, run {run + 1}")
-        # Initialize the EA object
-        ea = EA(population_size=population_size,
-                n_vars=n_vars,
-                upper_bound=upper_bound,
-                lower_bound=lower_bound,
-                crossover_rate=crossover_rate,
-                mutation_rate=mutation_rate,
-                mutation_std=mutation_std,
-                tournament_size=tournament_size,
-                alpha=alpha,
-                env=env,
-                no_generations=no_generations,
-                enemies=enemies)
+    for enemies in enemy_groups:
+        print(f"Running EA with enemies {enemies}")
+        for run in range(1):
+            print(f"Running EA with enemies {enemies}, run {run + 1}")
+            # Initialize the EA object
+            ea = EA(population_size=population_size,
+                    n_vars=n_vars,
+                    upper_bound=upper_bound,
+                    lower_bound=lower_bound,
+                    crossover_rate=crossover_rate,
+                    mutation_rate=mutation_rate,
+                    mutation_std=mutation_std,
+                    tournament_size=tournament_size,
+                    alpha=alpha,
+                    env=env,
+                    no_generations=no_generations,
+                    enemies=enemies)
 
-        # Run the evolutionary algorithm
-        ea.run()
+            # Run the evolutionary algorithm
+            ea.run()
 
 
 if __name__ == '__main__':
