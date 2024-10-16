@@ -105,10 +105,10 @@ def main():
     all_enemies = range(1, 9) # List of enemies to test agianst
 
     enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
-    # enemy_groups = [[1, 2, 3, 5]]
+    enemy_groups = [[1, 2, 3]]
 
     # for ea in ['EA1', 'EA2']:
-    for ea in ['EA1']:
+    for ea in ['EA2']:
         gainss = []
         for enemy in enemy_groups:
             enemies_folder = ''.join([str(enemy) for enemy in enemy])
@@ -118,7 +118,7 @@ def main():
 
                 # Load the weights from the file
                 folder_path = f'{folder_name}/{ea}/{enemies_folder}'
-                file_name = os.listdir(folder_path)[-3]
+                file_name = os.listdir(folder_path)[-1]
                 file_path = os.path.join(folder_path, file_name)
 
                 weights = np.loadtxt(file_path)
