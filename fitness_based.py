@@ -275,18 +275,16 @@ def main():
     # Generate all combinations of 3 enemies out of 8
     enemy_combinations = list(itertools.combinations(enemies, 3))
 
-    # Select the first half of the combinations
-    first_half_enemy_combinations = enemy_combinations[:len(enemy_combinations) // 2]
+    # Calculate the number of combinations in each of the 6 parts
+    part_size = len(enemy_combinations) // 6
 
-    # Calculate the number of combinations in each quartile
-    quartile_size = len(first_half_enemy_combinations) // 4
-
-    # Divide the first half into four quartiles
-    quartile_1 = first_half_enemy_combinations[:quartile_size]
-    quartile_2 = first_half_enemy_combinations[quartile_size:2 * quartile_size]
-    quartile_3 = first_half_enemy_combinations[2 * quartile_size:3 * quartile_size]
-    quartile_4 = first_half_enemy_combinations[3 * quartile_size:]
-
+    # Divide the entire population into 6 parts
+    # enemy_groups = enemy_combinations[:part_size]
+    # enemy_groups = enemy_combinations[part_size:2 * part_size]
+    # enemy_groups = enemy_combinations[2 * part_size:3 * part_size]
+    # enemy_groups = enemy_combinations[3 * part_size:4 * part_size]
+    # enemy_groups = enemy_combinations[4 * part_size:5 * part_size]
+    # enemy_groups = enemy_combinations[5 * part_size:]
     # enemy_groups = [[1]]
 
     for enemies in enemy_groups:
