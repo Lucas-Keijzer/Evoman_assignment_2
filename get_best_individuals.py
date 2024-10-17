@@ -41,7 +41,8 @@ def main():
     n_individuals_to_save = 10
 
     # all possible triples of enemies
-    enemy_groups = list(itertools.combinations(range(1, 9), 3))
+
+    enemy_groups = list(itertools.combinations(range(1, 9), 3))[::-1][:20]
     # print(len(enemy_groups))
     # enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
 
@@ -50,7 +51,6 @@ def main():
 
     # loop over the ea's and the groups of enemies
     for ea in ea_names:
-        n_files = 0
         for i, enemies in enumerate(enemy_groups):
             print(f"Processing enemy group number {i+1}/{len(enemy_groups)} {enemies} for {ea}")
             solutions = []
@@ -58,7 +58,6 @@ def main():
             enemies_name = ''.join(str(e) for e in enemies)
             directory = f"{folder_name}/{ea}/{enemies_name}/"
             files = os.listdir(directory)
-            n_files += len(files)
 
             # loop over all best experiment run solutions
             for file in files[:]:
