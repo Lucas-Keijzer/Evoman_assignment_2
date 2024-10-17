@@ -224,7 +224,38 @@ class EA:
             save_fitness_stats_to_csv(self.fitness_stats, self.enemies, EA_NAME)
 
             print("Best solution and fitness statistics saved.")
+# checks at all the currnet runs and returns the remaining runs in a list, per
+# run of a combination we add that combination to the list
+def get_remaining_runs(folder_path, NUMBER_OF_RUNS):
+    # Generate all combinations of 3 enemies out of 8
+    enemy_combinations = list(itertools.combinations(range(1, 9), 3))
 
+    folder_path = f'testdata/{EA_NAME}/'
+    files_per_subfolder = {}
+
+    # Loop over all the subdirectories in the main folder
+    for subfolder in os.listdir(folder_path):
+        subfolder_path = os.path.join(folder_path, subfolder)
+
+        # Check if it's a directory
+        if os.path.isdir(subfolder_path):
+
+            # Count the number of files in the subfolder and store
+            num_files = len([f for f in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, f))])
+            files_per_subfolder[tuple([int(el) for el in subfolder])] = num_files
+
+    # get the complement of the already existing runs:
+    remaining_runs = []
+    for combination in enemy_combinations:
+        if combination not in files_per_subfolder.keys():
+            for i in range(NUMBER_OF_RUNS):
+                remaining_runs.append(combination)
+        else:
+            if files_per_subfolder[combination] < NUMBER_OF_RUNS:
+                for i in range(NUMBER_OF_RUNS - files_per_subfolder[combination]):
+                    remaining_runs.append(combination)
+
+    return remaining_runs
 
 def main():
     # choose this for not using visuals and thus making experiments faster
@@ -270,26 +301,23 @@ def main():
     enemy_groups = [[1, 2, 3, 5, 8]]
     enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
     # List of 8 enemies
-    enemies = [1, 2, 3, 4, 5, 6, 7, 8]
-
-    # Generate all combinations of 3 enemies out of 8
-    enemy_combinations = list(itertools.combinations(enemies, 3))
+    NUMBER_OF_RUNS = 10
+    remaining_runs = get_remaining_runs(f'testdata/{EA_NAME}/', NUMBER_OF_RUNS)
 
     # Calculate the number of combinations in each of the 6 parts
-    part_size = len(enemy_combinations) // 6
+    part_size = len(remaining_runs) // 6
 
     # Divide the entire population into 6 parts
-    # enemy_groups = enemy_combinations[:part_size]
-    # enemy_groups = enemy_combinations[part_size:2 * part_size]
-    # enemy_groups = enemy_combinations[2 * part_size:3 * part_size]
-    # enemy_groups = enemy_combinations[3 * part_size:4 * part_size]
-    # enemy_groups = enemy_combinations[4 * part_size:5 * part_size]
-    # enemy_groups = enemy_combinations[5 * part_size:]
-    # enemy_groups = [[1]]
+    # enemy_groups = remaining_runs[:part_size]
+    # enemy_groups = remaining_runs[part_size:2 * part_size]
+    # enemy_groups = remaining_runs[2 * part_size:3 * part_size]
+    # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
+    # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
+    enemy_groups = remaining_runs[5 * part_size:]
+
 
     for enemies in enemy_groups:
-        print(f"Running EA with enemies {enemies}")
-        for run in range(15):
+        for run in range(1):  # the amount of runs are represented by repeating an enemy combination
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,
