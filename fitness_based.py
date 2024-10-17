@@ -225,7 +225,7 @@ class EA:
 
             print("Best solution and fitness statistics saved.")
 
-            
+
 # checks at all the currnet runs and returns the remaining runs in a list, per
 # run of a combination we add that combination to the list
 def get_remaining_runs(folder_path, NUMBER_OF_RUNS):
@@ -318,10 +318,11 @@ def main():
     # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
     # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
     # enemy_groups = remaining_runs[5 * part_size:]
+    enemy_groups = [[1,2]]
 
 
     for enemies in enemy_groups:
-        for run in range(1):  # the amount of runs are represented by repeating an enemy combination
+        for run in range(2):  # the amount of runs are represented by repeating an enemy combination
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,

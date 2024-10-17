@@ -18,7 +18,7 @@ def save_best_solution(best_solution, best_solution_fitness, enemies, ea_name):
     filename = f"{directory}solution_{timestamp}.txt"
 
     # Save only the weights as floating-point numbers to the txt file
-    np.savetxt(filename, best_solution, fmt='%f')
+    np.savetxt(filename, best_solution, fmt='%.18e')
 
     print(f"Best solution saved with fitness: {best_solution_fitness} to {filename}")
 
@@ -80,7 +80,7 @@ def save_final_best_solution(weights, individual_gain, number_of_enemies_beaten,
     to_save = np.append(np.array(individual_gain), np.array(number_of_enemies_beaten))
     to_save = np.append(to_save, np.array(enemies_beaten))
     to_save = np.append(to_save, weights)
-    np.savetxt(filename, to_save, fmt='%f')
+    np.savetxt(filename, to_save, fmt='%.18e')
 
 
 # loads the 10 best solution from the given enemies group and ea_name

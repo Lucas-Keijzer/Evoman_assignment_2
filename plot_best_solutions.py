@@ -46,7 +46,7 @@ def main():
     # Prepare a list to store statistics for the table
     data_for_table = []
 
-    for ea in ['EA1']:
+    for ea in ['EA2']:
         for enemy_group in enemy_groups:
             gains = []
             number_of_enemies_beatens = []
@@ -79,6 +79,9 @@ def main():
             # Prepare data for the table
             # Get indices of enemies beaten with player lives > -1
             indices_of_enemies_beaten = [i+1 for i, life in enumerate(best_enemies_beaten) if life > -1]
+            if enemy_group == (4,6,8):
+                print(indices_of_enemies_beaten)
+                print(best_enemies_beaten)
             # Join the indices as a comma-separated string
             total_enemies_beaten = ', '.join(map(str, indices_of_enemies_beaten))
 
