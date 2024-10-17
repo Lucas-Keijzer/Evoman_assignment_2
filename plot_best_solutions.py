@@ -37,6 +37,7 @@ def print_table_in_terminal(df):
     # Use pandas to_string method to print the DataFrame as a formatted table in the terminal
     print(df.to_string(index=False))
 
+
 def main():
     # Example enemy groups (replace with all 56 enemy groups)
     enemy_groups = list(itertools.combinations(range(1, 9), 3))[:]
