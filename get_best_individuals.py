@@ -42,7 +42,7 @@ def main():
 
     # all possible triples of enemies
 
-    enemy_groups = list(itertools.combinations(range(1, 9), 3))[::-1][:10]
+    enemy_groups = list(itertools.combinations(range(1, 9), 3))[::-1][:15]
     # print(len(enemy_groups))
     # enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
 
