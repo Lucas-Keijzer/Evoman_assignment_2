@@ -46,7 +46,7 @@ enemy_groups = list(itertools.combinations(range(1, 9), 3))
 
 enemy_groups = list(itertools.combinations(range(1, 9), 3))
 i_s = enemy_groups.index((3,4,8))
-i_e = enemy_groups.index((4,6,7))
+i_e = enemy_groups.index((3,5,7))
 print(i_s, i_e)
 
 
