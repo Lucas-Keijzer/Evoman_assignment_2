@@ -50,7 +50,7 @@ def main():
     # enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
 
     # ea_names = ['EA1', 'EA2']  # run all for both EA's
-    ea_names = ['EA2']  # use EA1 for testing
+    ea_names = ['EA1']  # use EA1 for testing
 
     # loop over the ea's and the groups of enemies
     for ea in ea_names:
