@@ -465,7 +465,7 @@ def objective(trial):
 
 # Function to execute the study
 def run_optuna_study(n_trials=2):
-    study_name = "optuna_fitness_max"
+    study_name = "optuna_fitness_max_367"
     storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
     
     # Create or load an existing study from the SQLite database
@@ -476,7 +476,7 @@ def run_optuna_study(n_trials=2):
     print("Study results saved to SQLite database.")
 
 if __name__ == "__main__":
-    run_optuna_study(n_trials=200)  # Set the number of trials (iterations)
+    run_optuna_study(n_trials=250)  # Set the number of trials (iterations)
 
 # if __name__ == '__main__':
 #     main()

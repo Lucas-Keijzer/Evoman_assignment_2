@@ -360,6 +360,7 @@ def objective(trial):
 
 # Function to execute the study
 def run_optuna_study(n_trials=2):
+    ### CHANGE STUDY NAME
     study_name = "optuna_age_max"
     storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
     
@@ -371,7 +372,7 @@ def run_optuna_study(n_trials=2):
     print("Study results saved to SQLite database.")
 
 if __name__ == "__main__":
-    run_optuna_study(n_trials=200)  # Set the number of trials (iterations)
+    run_optuna_study(n_trials=250)  # Set the number of trials (iterations)
 
     # env = CustomEnvironment(experiment_name=experiment_name,
     #                         enemies=[1],
