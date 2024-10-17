@@ -60,8 +60,8 @@ def save_fitness_stats_to_csv(fitness_stats, enemies, ea_name):
     print(f"Fitness statistics saved to {csv_filename}")
 
 
-# save the best final solution including individual gain
-def save_final_best_solution(best_solution, individual_gain, enemies, ea_name, name=None):
+# save the best final solution including individual gain and the amount of beaten enemies
+def save_final_best_solution(weights, individual_gain, number_of_enemies_beaten, enemies_beaten, enemies, ea_name, name=None):
     enemies_name = ''.join(str(e) for e in enemies)
 
     # Create directory if it doesn't exist
@@ -75,6 +75,25 @@ def save_final_best_solution(best_solution, individual_gain, enemies, ea_name, n
     else:
         filename = f"{directory}{name}.txt"
 
-    # Save the individual gain along with the weights
-    best_solution = np.append(individual_gain, best_solution)
-    np.savetxt(filename, best_solution, fmt='%f')
+    # Save the individual gain (single float), number of enemies beaten (single float),
+    # and the list of enemies beaten (8 floats, -1 if else player life).
+    to_save = np.append(np.array(individual_gain), np.array(number_of_enemies_beaten))
+    to_save = np.append(to_save, np.array(enemies_beaten))
+    to_save = np.append(to_save, weights)
+    np.savetxt(filename, to_save, fmt='%f')
+
+
+# loads the 10 best solution from the given enemies group and ea_name
+def load_best_solutions(ea_name, enemies):
+    enemies_name = ''.join(str(e) for e in enemies)
+
+    directory = f"final_best_solutions/{ea_name}/{enemies_name}/"
+    for file in os.listdir(directory):
+        #load everything except for the duplicate best solutions
+        if not file.startswith('best'):
+            data = np.loadtxt(directory + file)
+            individual_gain = data[0]
+            number_of_enemies_beaten = data[1]
+            enemies_beaten = data[2:10]
+            weights = data[10:]
+            yield individual_gain, number_of_enemies_beaten, enemies_beaten, weights

@@ -40,8 +40,10 @@ def main():
     n_individuals_to_save = 10
 
     enemy_groups = [[2, 5, 8], [1, 3, 4, 5]]
+    enemy_groups = [[1, 2, 3]]  # use 123 for testing
 
     ea_names = ['EA1', 'EA2']
+    ea_names = ['EA2']  # use EA1 for testing
 
     # loop over the ea's and the groups of enemies
     for ea in ea_names:
@@ -53,8 +55,9 @@ def main():
             files = os.listdir(directory)
 
             # loop over all best experiment run solutions
-            for file in files:
+            for file in files[:]:
                 gains = []
+                lives = []
                 weights = np.loadtxt(directory + file)
 
                 for enemy in range(1, 9):
@@ -74,16 +77,18 @@ def main():
                     # Calculate gain for this enemy
                     gain = player_life - enemy_life
                     gains.append(gain)
+                    lives.append((player_life, enemy_life))
 
                 total_gain = sum(gains)
-                enemies_beaten = len([g for g in gains if g > 0])
+                enemies_beaten = [-1 if el > 0 else pl for pl, el in lives]
+                number_of_enemies_beaten = len([l for l in enemies_beaten if l > -1])
 
                 # add the individual if it is better than the current worst individual
                 if len(solutions) < n_individuals_to_save:
-                    solutions.append((total_gain, enemies_beaten, weights))
+                    solutions.append((total_gain, number_of_enemies_beaten, enemies_beaten, weights))
                 else:
                     if total_gain > solutions[0][0]:
-                        solutions[0] = (total_gain, enemies_beaten, weights)
+                        solutions[0] = (total_gain, number_of_enemies_beaten, enemies_beaten, weights)
 
                 # resort after adding a new individual
                 solutions.sort(key=lambda x: x[0])
@@ -91,22 +96,29 @@ def main():
 
             # save all the n best solutions based on the individual gain per ea and enemy group
             for i, solution in enumerate(solutions):
-                save_final_best_solution(best_solution=solution[2],
-                                        individual_gain=solution[0], enemies=enemies,
-                                        ea_name=ea, name=f"solution{i+1}")
+                # print(f"Saving solution {i+1} with gain {solution[0]}, beaten enemies {solution[1]}, enemies beaten {solution[2]}")
+
+                save_final_best_solution(weights=solution[-1], individual_gain=solution[0],
+                                         number_of_enemies_beaten=solution[1],
+                                         enemies_beaten=solution[2], enemies=enemies, ea_name=ea,
+                                         name=f"solution{i+1}")
 
             # get and save the best solution based on the individual gain
-            best_solution = solutions[-1][2]
-            save_final_best_solution(best_solution=best_solution,
-                                    individual_gain=solutions[-1][0], enemies=enemies,
-                                    ea_name=ea, name="best_individual_gain")
+            best_solution = solutions[-1]
+            save_final_best_solution(weights=best_solution[-1],
+                                     individual_gain=best_solution[0],
+                                     number_of_enemies_beaten=best_solution[1],
+                                     enemies_beaten=best_solution[2], enemies=enemies, ea_name=ea,
+                                     name=f"best_gain")
 
             # get and save the best solution based on the amount of enemies beaten
             solutions.sort(key=lambda x: (x[1], x[0]))
-            best_solution = solutions[-1][2]
-            save_final_best_solution(best_solution=best_solution,
-                                    individual_gain=solutions[-1][0], enemies=enemies,
-                                    ea_name=ea, name="best_enemies_beaten")
+            best_solution = solutions[-1]
+            save_final_best_solution(weights=best_solution[-1],
+                                     individual_gain=best_solution[0],
+                                     number_of_enemies_beaten=best_solution[1],
+                                     enemies_beaten=best_solution[2], enemies=enemies, ea_name=ea,
+                                     name=f"best_defeated")
 
 
 if __name__ == '__main__':
