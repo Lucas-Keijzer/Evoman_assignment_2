@@ -43,9 +43,9 @@ def main():
     # all possible triples of enemies
 
     enemy_groups = list(itertools.combinations(range(1, 9), 3))[41:46]
-    i_s = enemy_groups.index((3,4,8))
-    i_e = enemy_groups.index((4,6,7))
-    print(i_s, i_e)
+    # i_s = enemy_groups.index((3,4,8))
+    # i_e = enemy_groups.index((4,6,7))
+    # print(i_s, i_e)
     # print(len(enemy_groups))
     # enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
 
