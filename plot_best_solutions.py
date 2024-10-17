@@ -5,33 +5,27 @@ import pandas as pd
 import seaborn as sns
 
 
-def plot_table_and_heatmaps(df, ea, best_enemies_beaten, enemy_group):
+def plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group):
     """
-    Function to plot the table and the heatmap.
+    Function to plot the table and the heatmap in the same row.
     """
-    # Create a new figure for the table and heatmap
-    fig, axs = plt.subplots(2, 1, figsize=(10, 6), gridspec_kw={'height_ratios': [3, 1]})
+    # Increase the figure width to provide enough space
+    fig, ax = plt.subplots(figsize=(12, 4))  # Adjusted width and height for table
 
-    # 1. Display the table
-    axs[0].axis('off')  # Hide the axes for the table
+    # Turn off the axis for the table
+    ax.axis('off')
+
+    # Create the table
     table_data = df.values
     column_labels = df.columns
 
     # Create table within the Matplotlib plot
-    table = axs[0].table(cellText=table_data, colLabels=column_labels, cellLoc='center', loc='center')
+    table = ax.table(cellText=table_data, colLabels=column_labels, cellLoc='center', loc='center')
     table.auto_set_font_size(False)
     table.set_fontsize(10)
     table.scale(1.2, 1.2)  # Scale to fit
 
-    # 2. Plot the heatmap for the best enemies beaten
-    sns.heatmap(best_enemies_beaten.reshape(1, -1), cmap='RdYlGn', annot=True, cbar=True,
-                vmin=-1, vmax=100, linewidths=1, linecolor='black', fmt='.0f', ax=axs[1])
-    axs[1].set_title(f"Best Enemies Beaten for EA: {ea}, Enemy Group: {enemy_group}")
-    axs[1].set_xlabel("Enemy Index")
-    axs[1].set_yticks([])  # Hide y-axis ticks since it's just one row
-
-    # Adjust layout to fit the table and heatmap
-    plt.tight_layout()
+    # Display the figure
     plt.show()
 
 
@@ -66,26 +60,35 @@ def main():
 
             enemies_beaten_mean = np.mean(number_of_enemies_beatens)
             enemies_beaten_max = np.max(number_of_enemies_beatens)
-            enemies_beaten_std = np.std(number_of_enemies_beatens)
+            enemies_beaten_std = np.std(number_of_enemies_beaten)
 
             # Identify the best solution (max gain)
             best_solution_index = np.argmax(gains)
             best_enemies_beaten = enemies_beatens[best_solution_index]
 
-            # Append stats to the data_for_table list
+            # Prepare data for the table
+            # Get indices of enemies beaten with player lives > -1
+            indices_of_enemies_beaten = [i+1 for i, life in enumerate(best_enemies_beaten) if life > -1]
+            # Join the indices as a comma-separated string
+            total_enemies_beaten = ', '.join(map(str, indices_of_enemies_beaten))
+
+            # Append stats and enemies beaten to the data_for_table list
             data_for_table.append({
                 'EA': ea,
                 'Enemy Group': str(enemy_group),
                 'Gain Mean ± Std': f"{gains_mean:.2f} ± {gains_std:.2f}",
                 'Gain Max': gains_max,
                 'Enemies Beaten Mean ± Std': f"{enemies_beaten_mean:.2f} ± {enemies_beaten_std:.2f}",
-                'Enemies Beaten Max': enemies_beaten_max
+                'Enemies Beaten Max': enemies_beaten_max,
+                'Enemies Beaten': total_enemies_beaten  # Last column with total enemies beaten
             })
 
             # After each group, convert data to DataFrame and plot
             df = pd.DataFrame(data_for_table)
-            plot_table_and_heatmaps(df, ea, best_enemies_beaten, enemy_group)
+
+            # Plot the table and heatmap
+            plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

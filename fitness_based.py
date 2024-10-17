@@ -308,13 +308,13 @@ def main():
     # Calculate the number of combinations in each of the 6 parts
     part_size = len(remaining_runs) // 6
 
-    # # Divide the entire population into 6 parts
-    # enemy_groups = remaining_runs[:part_size]
-    # enemy_groups = remaining_runs[part_size:2 * part_size]
-    # enemy_groups = remaining_runs[2 * part_size:3 * part_size]
-    # # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
-    # # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
-    # # enemy_groups = remaining_runs[5 * part_size:]
+    # Divide the entire population into 6 parts
+    enemy_groups = remaining_runs[:part_size]
+    enemy_groups = remaining_runs[part_size:2 * part_size]
+    enemy_groups = remaining_runs[2 * part_size:3 * part_size]
+    # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
+    # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
+    # enemy_groups = remaining_runs[5 * part_size:]
 
 
     # for enemies in enemy_groups:
