@@ -42,7 +42,7 @@ def main():
 
     # all possible triples of enemies
     enemy_groups = list(itertools.combinations(range(1, 9), 3))
-    enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
+    # enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
 
     # ea_names = ['EA1', 'EA2']
     ea_names = ['EA1']  # use EA1 for testing
