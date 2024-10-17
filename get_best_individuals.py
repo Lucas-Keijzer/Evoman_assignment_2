@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 import pandas as pd
+import itertools
 
 # evoman framework
 from evoman.environment import Environment
@@ -39,15 +40,17 @@ def main():
     # Define the number of individuals to save
     n_individuals_to_save = 10
 
-    enemy_groups = [[2, 5, 8], [1, 3, 4, 5]]
-    enemy_groups = [[1, 2, 3]]  # use 123 for testing
+    # all possible triples of enemies
+    enemy_groups = list(itertools.combinations(range(1, 9), 3))
+    enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
 
-    ea_names = ['EA1', 'EA2']
-    ea_names = ['EA2']  # use EA1 for testing
+    # ea_names = ['EA1', 'EA2']
+    ea_names = ['EA1']  # use EA1 for testing
 
     # loop over the ea's and the groups of enemies
     for ea in ea_names:
-        for enemies in enemy_groups:
+        for i, enemies in enumerate(enemy_groups):
+            print(f"Processing enemy group number {i}/{len(enemy_groups)} {enemies} for {ea}")
             solutions = []
 
             enemies_name = ''.join(str(e) for e in enemies)

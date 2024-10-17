@@ -224,6 +224,8 @@ class EA:
             save_fitness_stats_to_csv(self.fitness_stats, self.enemies, EA_NAME)
 
             print("Best solution and fitness statistics saved.")
+
+            
 # checks at all the currnet runs and returns the remaining runs in a list, per
 # run of a combination we add that combination to the list
 def get_remaining_runs(folder_path, NUMBER_OF_RUNS):
@@ -256,6 +258,7 @@ def get_remaining_runs(folder_path, NUMBER_OF_RUNS):
                     remaining_runs.append(combination)
 
     return remaining_runs
+
 
 def main():
     # choose this for not using visuals and thus making experiments faster
@@ -308,12 +311,12 @@ def main():
     # Calculate the number of combinations in each of the 6 parts
     part_size = int(np.ceil(len(remaining_runs) / 6))
 
-    # Divide the entire population into 6 parts
-    enemy_groups = remaining_runs[:part_size]
-    enemy_groups = remaining_runs[part_size:2 * part_size]
-    enemy_groups = remaining_runs[2 * part_size:3 * part_size]
-    enemy_groups = remaining_runs[3 * part_size:4 * part_size]
-    enemy_groups = remaining_runs[4 * part_size:5 * part_size]
+    # Divide all the possible combinations into 6 parts
+    # enemy_groups = remaining_runs[:part_size]
+    # enemy_groups = remaining_runs[part_size:2 * part_size]
+    # enemy_groups = remaining_runs[2 * part_size:3 * part_size]
+    # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
+    # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
     # enemy_groups = remaining_runs[5 * part_size:]
 
 

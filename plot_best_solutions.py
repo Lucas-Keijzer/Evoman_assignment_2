@@ -31,7 +31,7 @@ def plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group):
 
 def main():
     # Example enemy groups (replace with all 56 enemy groups)
-    enemy_groups = [[1, 2, 3], [4, 5, 6]]  # Add all 56 enemy groups here
+    enemy_groups = [[1, 2, 3]]  # Add all 56 enemy groups here
 
     # Prepare a list to store statistics for the table
     data_for_table = []
@@ -78,8 +78,8 @@ def main():
                 'Enemy Group': str(enemy_group),
                 'Gain Mean ± Std': f"{gains_mean:.2f} ± {gains_std:.2f}",
                 'Gain Max': gains_max,
-                'Enemies Beaten Mean ± Std': f"{enemies_beaten_mean:.2f} ± {enemies_beaten_std:.2f}",
-                'Enemies Beaten Max': enemies_beaten_max,
+                '# kills Mean ± Std': f"{enemies_beaten_mean:.2f} ± {enemies_beaten_std:.2f}",
+                'Max # kills': enemies_beaten_max,
                 'Enemies Beaten': total_enemies_beaten  # Last column with total enemies beaten
             })
 
