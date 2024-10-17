@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import itertools
 
 
 def plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group):
@@ -31,12 +32,13 @@ def plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group):
 
 def main():
     # Example enemy groups (replace with all 56 enemy groups)
-    enemy_groups = [[1, 2, 3]]  # Add all 56 enemy groups here
+    enemy_groups = list(itertools.combinations(range(1, 9), 3))[:20]
+    # enemy_groups = [[1, 2, 3]]  # Add all 56 enemy groups here
 
     # Prepare a list to store statistics for the table
     data_for_table = []
 
-    for ea in ['EA2']:
+    for ea in ['EA1']:
         for enemy_group in enemy_groups:
             gains = []
             number_of_enemies_beatens = []
@@ -86,8 +88,8 @@ def main():
             # After each group, convert data to DataFrame and plot
             df = pd.DataFrame(data_for_table)
 
-            # Plot the table and heatmap
-            plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group)
+        # Plot the table and heatmap
+        plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group)
 
 
 if __name__ == "__main__":
