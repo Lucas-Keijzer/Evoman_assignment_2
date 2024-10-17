@@ -30,9 +30,16 @@ def plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group):
     plt.show()
 
 
+def print_table_in_terminal(df):
+    """
+    Function to print the table in the terminal.
+    """
+    # Use pandas to_string method to print the DataFrame as a formatted table in the terminal
+    print(df.to_string(index=False))
+
 def main():
     # Example enemy groups (replace with all 56 enemy groups)
-    enemy_groups = list(itertools.combinations(range(1, 9), 3))[:20]
+    enemy_groups = list(itertools.combinations(range(1, 9), 3))[:]
     # enemy_groups = [[1, 2, 3]]  # Add all 56 enemy groups here
 
     # Prepare a list to store statistics for the table
@@ -85,11 +92,11 @@ def main():
                 'Enemies Beaten': total_enemies_beaten  # Last column with total enemies beaten
             })
 
-            # After each group, convert data to DataFrame and plot
+            # After each group, convert data to DataFrame and print it
             df = pd.DataFrame(data_for_table)
 
-        # Plot the table and heatmap
-        plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group)
+        # Print the table to the terminal
+        print_table_in_terminal(df)
 
 
 if __name__ == "__main__":
