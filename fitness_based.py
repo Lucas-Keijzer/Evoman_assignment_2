@@ -312,30 +312,34 @@ def main():
     # enemy_groups = remaining_runs[:part_size]
     # enemy_groups = remaining_runs[part_size:2 * part_size]
     # enemy_groups = remaining_runs[2 * part_size:3 * part_size]
-    # # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
-    # # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
-    # # enemy_groups = remaining_runs[5 * part_size:]
+    enemy_groups1 = remaining_runs[3 * part_size:4 * part_size]
+    enemy_groups2 = remaining_runs[4 * part_size:5 * part_size]
+    enemy_groups3 = remaining_runs[5 * part_size:]
+
+    print(enemy_groups1)    
+    print(enemy_groups2)
+    print(enemy_groups3)
 
 
-    # for enemies in enemy_groups:
-    #     for run in range(1):  # the amount of runs are represented by repeating an enemy combination
-    #         print(f"Running EA with enemies {enemies}, run {run + 1}")
-    #         # Initialize the EA object
-    #         ea = EA(population_size=population_size,
-    #                 n_vars=n_vars,
-    #                 upper_bound=upper_bound,
-    #                 lower_bound=lower_bound,
-    #                 crossover_rate=crossover_rate,
-    #                 mutation_rate=mutation_rate,
-    #                 mutation_std=mutation_std,
-    #                 tournament_size=tournament_size,
-    #                 alpha=alpha,
-    #                 env=env,
-    #                 no_generations=no_generations,
-    #                 enemies=enemies)
+    for enemies in enemy_groups:
+        for run in range(1):  # the amount of runs are represented by repeating an enemy combination
+            print(f"Running EA with enemies {enemies}, run {run + 1}")
+            # Initialize the EA object
+            ea = EA(population_size=population_size,
+                    n_vars=n_vars,
+                    upper_bound=upper_bound,
+                    lower_bound=lower_bound,
+                    crossover_rate=crossover_rate,
+                    mutation_rate=mutation_rate,
+                    mutation_std=mutation_std,
+                    tournament_size=tournament_size,
+                    alpha=alpha,
+                    env=env,
+                    no_generations=no_generations,
+                    enemies=enemies)
 
-    #         # Run the evolutionary algorithm
-    #         ea.run()
+            # Run the evolutionary algorithm
+            ea.run()
 
 
 if __name__ == '__main__':
