@@ -42,7 +42,7 @@ def main():
 
     # all possible triples of enemies
 
-    enemy_groups = list(itertools.combinations(range(1, 9), 3))[41:46]
+    enemy_groups = list(itertools.combinations(range(1, 9), 3))[38:51]
     # i_s = enemy_groups.index((3,4,8))
     # i_e = enemy_groups.index((4,6,7))
     # print(i_s, i_e)
@@ -50,7 +50,7 @@ def main():
     # enemy_groups = [[1, 2, 3]]  # use only the first group for testing comment dit ff uit wanneer je alles runt
 
     # ea_names = ['EA1', 'EA2']  # run all for both EA's
-    ea_names = ['EA2']  # use EA1 for testing
+    ea_names = ['EA1']  # use EA1 for testing
 
     # loop over the ea's and the groups of enemies
     for ea in ea_names:
