@@ -105,7 +105,22 @@ def main():
     all_enemies = range(1, 9) # List of enemies to test agianst
 
     enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
-    enemy_groups = [[1, 2, 3]]
+    enemy_groups = [[4, 5, 8]]
+
+    # goated agents:EA2:
+    # 125 4,8,9
+    # 126 0,
+    # 138 5,6
+    # 145 5,
+    # 234 1,6
+    # 247 2(5!),3(5!),9
+    # 248 0,5,6,7,9
+    # 256 2,3,4(5!),9
+    # 257 4(5!+180),7,8,
+    # 378 5,7,9
+    # 457 2,8,9
+    # 458 -(miss 7 toevoegen voor generalisatie)
+
 
     # for ea in ['EA1', 'EA2']:
     for ea in ['EA2']:
@@ -118,7 +133,7 @@ def main():
 
                 # Load the weights from the file
                 folder_path = f'{folder_name}/{ea}/{enemies_folder}'
-                file_name = os.listdir(folder_path)[-1]
+                file_name = os.listdir(folder_path)[9]
                 file_path = os.path.join(folder_path, file_name)
 
                 weights = np.loadtxt(file_path)
@@ -148,7 +163,7 @@ def main():
     for i, gains in enumerate(gainss):
         print({i + 1})
         print(gainss)
-        print(f'EA1 total gain agianst enemies: {list(all_enemies)} = {sum(gains)}')
+        print(f'EA1 total gain agianst all enemies: = {sum(gains)}')
         print(f'EA1 beat enemies: {[(i + 1, pl) for i, (pl, el) in enumerate(lives) if el <=0]}')
 
 

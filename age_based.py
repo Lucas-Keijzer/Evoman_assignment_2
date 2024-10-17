@@ -308,7 +308,7 @@ def main():
 
     # enemy_groups = [[1, 2, 5], [7, 8]]
 
-    NUMBER_OF_RUNS = 5
+    NUMBER_OF_RUNS = 10
     remaining_runs = get_remaining_runs(f'testdata/{EA_NAME}/', NUMBER_OF_RUNS)
 
     # Calculate the number of combinations in each of the 6 parts
