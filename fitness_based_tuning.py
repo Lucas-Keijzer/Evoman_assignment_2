@@ -447,8 +447,8 @@ def objective(trial):
         alpha=alpha,
         env=env,
         no_generations=no_generations,
-        enemies=[3,6,7] 
-        # enemies=[2,5,7]
+        # enemies=[3,6,7] 
+        enemies=[2,5,7]
     )
 # [3,6,7] , [2,5,7]
 
@@ -465,7 +465,7 @@ def objective(trial):
 
 # Function to execute the study
 def run_optuna_study(n_trials=2):
-    study_name = "optuna_fitness_max_367"
+    study_name = "optuna_fitness_max_257"
     storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
     
     # Create or load an existing study from the SQLite database
