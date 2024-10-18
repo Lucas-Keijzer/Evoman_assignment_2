@@ -272,7 +272,7 @@ class HyperparameterTuner:
         # Run EA for each configuration
         for config in configurations:
             print(f"Testing configuration: {config}")
-            
+
             # Create the EA instance with the current hyperparameter configuration
             ea = EA(
                 population_size=config["population_size"],
@@ -302,7 +302,7 @@ class HyperparameterTuner:
         print(best_config)
         print(f"Best fitness achieved: {best_fitness}")
 
-        
+
 def objective(trial):
     # Define the search space for hyperparameters
     population_size = trial.suggest_int('population_size', 50, 200, step=2)  # Range of population size
@@ -342,8 +342,8 @@ def objective(trial):
         alpha=alpha,
         env=env,
         no_generations=no_generations,
-        enemies=[3,6,7]
-        # enemies=[2,5,7]
+        # enemies=[3,6,7]
+        enemies=[2,5,7]
     )
 # [3,6,7] , [2,5,7]
 
@@ -354,21 +354,21 @@ def objective(trial):
     # return ea.best_solution_fitness  # Return the best fitness as the objective value
     fitness_population = ea.evaluate_population()
     max_fitness = np.max(fitness_population)
-    
+
     return max_fitness
 
 
 # Function to execute the study
 def run_optuna_study(n_trials=2):
     ### CHANGE STUDY NAME
-    study_name = "optuna_age_max"
+    study_name = "optuna_age_max_257"
     storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
-    
+
     # Create or load an existing study from the SQLite database
     study = optuna.create_study(study_name=study_name, direction="maximize", storage=storage_name, load_if_exists=True)
-    
+
     study.optimize(objective, n_trials=n_trials)
-    
+
     print("Study results saved to SQLite database.")
 
 if __name__ == "__main__":
