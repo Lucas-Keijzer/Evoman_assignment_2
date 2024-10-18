@@ -294,11 +294,12 @@ def main():
 
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
+    upper_bound = 1
+    lower_bound = -1
+
     # 257 variables
     population_size = 180
     no_generations = 30
-    upper_bound = 1
-    lower_bound = -1
     crossover_rate = 0.95
     mutation_rate = 0.225
     mutation_std = 0.25
@@ -306,17 +307,15 @@ def main():
     tournament_size = 7
 
     # 367  configuration
-    population_size = 130
+    population_size = 125
     no_generations = 30
-    upper_bound = 1
-    lower_bound = -1
-    crossover_rate = 0.9
-    alpha = 0.75
-    mutation_rate = 0.22
-    mutation_std = 0.45
-    tournament_size = 7
+    crossover_rate = 0.8
+    alpha = 0.4
+    mutation_rate = 0.91
+    mutation_std = 0.5
+    tournament_size = 8
 
-    # enemy_groups = [[1, 2, 5], [7, 8]]
+    enemy_groups = [[2, 5, 7], [3, 6, 7]]
 
     NUMBER_OF_RUNS = 10
     remaining_runs = get_remaining_runs(f'testdata/{EA_NAME}/', NUMBER_OF_RUNS)
