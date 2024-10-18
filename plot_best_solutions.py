@@ -46,7 +46,7 @@ def main():
     # Prepare a list to store statistics for the table
     data_for_table = []
 
-    for ea in ['EA2', 'EA1']:
+    for ea in ['EA1']:
         for enemy_group in enemy_groups:
             gains = []
             number_of_enemies_beatens = []

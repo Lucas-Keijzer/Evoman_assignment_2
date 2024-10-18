@@ -288,7 +288,6 @@ def main():
 
     # EA configuration
     population_size = 80
-    # population_size = 10  # for now for testing
     no_generations = 30
     upper_bound = 1
     lower_bound = -1

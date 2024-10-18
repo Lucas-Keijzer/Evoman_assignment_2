@@ -294,9 +294,19 @@ def main():
 
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
-    # EA configuration
+    # 257 variables
+    population_size = 180
+    no_generations = 30
+    upper_bound = 1
+    lower_bound = -1
+    crossover_rate = 0.95
+    mutation_rate = 0.225
+    mutation_std = 0.25
+    alpha = 0.39
+    tournament_size = 7
+
+    # 367  configuration
     population_size = 130
-    # population_size = 10  # for now for testing
     no_generations = 30
     upper_bound = 1
     lower_bound = -1
