@@ -1,4 +1,10 @@
-# file_utils.py
+"""
+Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
+
+Description: This file implements the loading and saving of specific files
+formats for the different EAs and the plotting of the best solutions.
+"""
+
 import os
 import csv
 import numpy as np
@@ -106,6 +112,23 @@ def load_best_solutions(ea_name, enemies):
     enemies_name = ''.join(str(e) for e in enemies)
 
     directory = f"final_best_solutions/{ea_name}/{enemies_name}/"
+    for file in os.listdir(directory):
+        #load everything except for the duplicate best solutions
+        if not file.startswith('best'):
+            data = np.loadtxt(directory + file)
+            individual_gain = data[0]
+            number_of_enemies_beaten = data[1]
+            enemies_beaten = data[2:10]
+            weights = data[10:]
+            yield individual_gain, number_of_enemies_beaten, enemies_beaten, weights
+
+
+# loads the 10 best solution from the given enemies group and ea_name
+# specifically for plotting the best solutions in the boxplots
+def load_best_plot_solutions(ea_name, enemies):
+    enemies_name = ''.join(str(e) for e in enemies)
+
+    directory = f"plot_best_solutions/{ea_name}/{enemies_name}/"
     for file in os.listdir(directory):
         #load everything except for the duplicate best solutions
         if not file.startswith('best'):

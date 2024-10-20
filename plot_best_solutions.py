@@ -1,3 +1,10 @@
+"""
+Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
+
+
+"""
+
+
 from file_utils import load_best_solutions
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,47 +13,20 @@ import seaborn as sns
 import itertools
 
 
-def plot_table_and_heatmap_in_row(df, ea, best_enemies_beaten, enemy_group):
-    """
-    Function to plot the table and the heatmap in the same row.
-    """
-    # Increase the figure width to provide enough space
-    fig, ax = plt.subplots(figsize=(12, 4))  # Adjusted width and height for table
-
-    # Turn off the axis for the table
-    ax.axis('off')
-
-    # Create the table
-    table_data = df.values
-    column_labels = df.columns
-
-    # Create table within the Matplotlib plot
-    table = ax.table(cellText=table_data, colLabels=column_labels, cellLoc='center', loc='center')
-    table.auto_set_font_size(False)
-    table.set_fontsize(10)
-    table.scale(1.2, 1.2)  # Scale to fit
-
-    # Display the figure
-    plt.show()
-
-
+# prints the table of all the results in the terminal
 def print_table_in_terminal(df):
-    """
-    Function to print the table in the terminal.
-    """
     # Use pandas to_string method to print the DataFrame as a formatted table in the terminal
     print(df.to_string(index=False))
 
 
 def main():
     # Example enemy groups (replace with all 56 enemy groups)
-    enemy_groups = list(itertools.combinations(range(1, 9), 3))[:]
-    # enemy_groups = [[1, 2, 3]]  # Add all 56 enemy groups here
+    enemy_groups = list(itertools.combinations(range(1, 9), 3))
 
     # Prepare a list to store statistics for the table
     data_for_table = []
 
-    for ea in ['EA1']:
+    for ea in ['EA1', 'EA2']:
         for enemy_group in enemy_groups:
             gains = []
             number_of_enemies_beatens = []

@@ -115,7 +115,7 @@ class Environment(object):
             self.joy = pygame.joystick.get_count()
 
         self.clock = pygame.time.Clock() # initializes game clock resource
-        
+
         if self.fullscreen:
             flags =  DOUBLEBUF  |  FULLSCREEN
         else:
@@ -399,7 +399,7 @@ class Environment(object):
 
     # default fitness function for consolidating solutions among multiple games
     def cons_multi(self,values):
-        return values.mean() - values.std()
+        return values.mean() - 0.1 * values.std()
 
     # measures the energy of the player
     def get_playerlife(self):
@@ -486,7 +486,7 @@ class Environment(object):
             self.tilemap.update( 33 / 1000., self)
 
             if self.visuals:
-                
+
                 self.screen.fill((250,250,250))
                 self.tilemap.draw(self.screen)
 

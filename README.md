@@ -3,25 +3,18 @@ EAs. These EAs are tested against one another based on some different statistics
 
 Folders:
   - final_best_solutions:
-      Contains 6 best solutions: one per enemy for three different enemies for
-      both EAs
+      Contains 2 * 56 * 10 best solutions in txt format. These are all the best
+      solutions found by both EAs for all the different combinations of 3
+      enemies and then the best of 10 runs for each of these combinations.
 
   - final_data:
       Contains 10 csv files for 10 different training runs. Per EA 10 runs have
-      been done per enemy, which means 2 * 3 * 10 = 60 runs.
-
-  - plots:
-      Contains the plots generated to show the data between the two different
-      EAs.
-
-  - tuning:
-      Contains all the files used and generated for the hyperparameter tuning
-      of both of the EAs.
+      been done per enemy group, which means 2 * 10 * 2 = 40 runs/files.
 
 Files:
-  - fitness_sharing.py:
-      Contains the implementation of 'EA1' which makes use of fitness sharing
-      to preserve the diversity. Running this file can be done using:
+  - fitness_based.py:
+      Contains the implementation of 'EA1' which makes use of fitness based
+      generation replacement. Running this file can be done using:
 
       'python3/python fitness_sharing.py
 

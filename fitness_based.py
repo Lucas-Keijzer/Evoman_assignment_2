@@ -1,14 +1,15 @@
 """
 Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
 
-Description: This file implements the fitness sharing evolutionary algorithm.
-This is a modified version of the EA1 algorithm that includes fitness sharing
-to encourage diversity in the population. The EA1 algorithm is modified to
-include a sharing function that calculates the portion of fitness that one
-should get based on the distance between the individuals. This sharing function
-is then applied directly into the fitness to encourage diversity in the
-population. The EA1 algorithm is then run with the fitness sharing mechanism
-to compare the results with the standard EA1 algorithm.
+Description: This file implements a EA using a fitness-based generational
+replacement. The EA is used to optimize the weights of a neural network
+controller for the Evoman game. The EA uses tournament selection, blend
+crossover, and Gaussian mutation. The EA is run for a fixed number of
+generations and the best solution found is saved to a file. The fitness
+function is a combination of the player life, enemy life, and time taken to
+complete the level. The EA is run for multiple enemies and the best solution
+for each enemy is saved to a separate file. The fitness statistics for each
+generation are saved to a CSV file.
 """
 
 # imports framework
@@ -84,18 +85,23 @@ class EA:
         if not os.path.exists("testdata"):
             os.makedirs("testdata")
 
+    # initializes the population with random values
     def initialize_population(self):
         return np.random.uniform(self.lower_bound, self.upper_bound, (self.population_size, self.n_vars))
 
+    # clamps the individual to the bounds ensures valid weights
     def clamp(self, individual):
         return np.clip(individual, self.lower_bound, self.upper_bound)
 
+    # tournament selection to select the best individual from a random subset
+    # of the population
     def tournament_selection(self, fitness_population):
         selected_indices = np.random.choice(self.population.shape[0], self.tournament_size, replace=False)
         selected_fitness = fitness_population[selected_indices]
         best_index = np.argmax(selected_fitness)
         return self.population[selected_indices[best_index]]
 
+    # performs blend crossover between two individuals, returns the offspring
     def crossover_single(self, parent1, parent2):
         offspring = np.zeros_like(parent1)
 
@@ -299,31 +305,10 @@ def main():
     mutation_std = 0.45
     tournament_size = 7
 
-    # enemies = [1]
-
-    # test groups
-    enemy_groups = [[1, 2, 3, 5, 8]]
     enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
-    # List of 8 enemies
-    NUMBER_OF_RUNS = 10
-    remaining_runs = get_remaining_runs(f'testdata/{EA_NAME}/', NUMBER_OF_RUNS)
-    print(len(remaining_runs))
-
-    # Calculate the number of combinations in each of the 6 parts
-    part_size = int(np.ceil(len(remaining_runs) / 6))
-
-    # Divide all the possible combinations into 6 parts
-    # enemy_groups = remaining_runs[:part_size]
-    # enemy_groups = remaining_runs[part_size:2 * part_size]
-    # enemy_groups = remaining_runs[2 * part_size:3 * part_size]
-    # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
-    # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
-    # enemy_groups = remaining_runs[5 * part_size:]
-    enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
-
 
     for enemies in enemy_groups:
-        for run in range(9):  # the amount of runs are represented by repeating an enemy combination
+        for run in range(10):  # the amount of runs are represented by repeating an enemy combination
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,

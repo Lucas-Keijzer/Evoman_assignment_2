@@ -1,14 +1,16 @@
 """
 Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
 
-Description: This file implements the fitness sharing evolutionary algorithm.
-This is a modified version of the EA1 algorithm that includes fitness sharing
-to encourage diversity in the population. The EA1 algorithm is modified to
-include a sharing function that calculates the portion of fitness that one
-should get based on the distance between the individuals. This sharing function
-is then applied directly into the fitness to encourage diversity in the
-population. The EA1 algorithm is then run with the fitness sharing mechanism
-to compare the results with the standard EA1 algorithm.
+Description: This file implements the tuning mechanism for the evolutionary
+algorithm. Specifically, it tunes the hyperparameters of the EA2 (age-based)
+algorithm using Optuna. The objective function is the fitness of the best
+individual found by the EA2 algorithm. The hyperparameters to be tuned are the
+population size, crossover rate, mutation rate, mutation standard deviation,
+blend crossover alpha, tournament size, and number of generations. The search
+space for each hyperparameter is defined in the `objective` function. The
+`run_optuna_study` function executes the Optuna study with a specified number of
+trials. The best hyperparameter configuration and fitness are printed at the end
+of the study.
 """
 
 # imports framework

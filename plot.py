@@ -5,7 +5,9 @@ Description: This script is used to visualize the fitness and diversity
 statistics for the two different EAs. The data is loaded from the CSV files
 generated during the experiments. The diversity statistics are then visualized
 in a similar way, showing the average and standard deviation of the diversity
-values for each enemy. The plots are saved in the plots/EA1_vs_EA2 folder.
+values for each enemy. It also plots the best solutions in a boxplot and
+performs a statistical analysis on all 4 different setups to determine if the
+differences are significant.
 """
 
 import os
@@ -14,9 +16,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-from file_utils import load_best_solutions
+from file_utils import load_best_plot_solutions
 import pandas as pd
 import scipy.stats as stats
+from itertools import product
 
 ea1 = 'EA1'
 ea2 = 'EA2'
@@ -54,13 +57,13 @@ def load_data(ea_folder, enemy_folder):
                 mean_fitnesses[generation].append(mean_fitness)
                 varieties[generation].append(variety)
 
-    # Calculate the average and standard deviation for each generation
-    avg_max_fitness = [np.mean(fitness) for fitness in max_fitnesses if fitness]  # Filter out empty lists
-    avg_mean_fitness = [np.mean(fitness) for fitness in mean_fitnesses if fitness]  # Filter out empty lists
-    avg_variety = [np.mean(variety) for variety in varieties if variety]  # Filter out empty lists
-    std_max_fitness = [np.std(fitness) for fitness in max_fitnesses if fitness]  # Filter out empty lists
-    std_mean_fitness = [np.std(fitness) for fitness in mean_fitnesses if fitness]  # Filter out empty lists
-    std_variety = [np.std(variety) for variety in varieties if variety]  # Filter out empty lists
+    # Calculate the average and standard deviation for each generation and filter out empty lists
+    avg_max_fitness = [np.mean(fitness) for fitness in max_fitnesses if fitness]
+    avg_mean_fitness = [np.mean(fitness) for fitness in mean_fitnesses if fitness]
+    avg_variety = [np.mean(variety) for variety in varieties if variety]
+    std_max_fitness = [np.std(fitness) for fitness in max_fitnesses if fitness]
+    std_mean_fitness = [np.std(fitness) for fitness in mean_fitnesses if fitness]
+    std_variety = [np.std(variety) for variety in varieties if variety]
 
     # Generate corresponding generations list (without gaps)
     valid_generations = [i for i, fitness in enumerate(max_fitnesses) if fitness]
@@ -68,7 +71,7 @@ def load_data(ea_folder, enemy_folder):
     return valid_generations, avg_max_fitness, avg_mean_fitness, std_max_fitness, std_mean_fitness, avg_variety, std_variety
 
 
-# Function to plot the fitness statistics for multiple EAs
+# Function to plot the fitness statistics for both eas trained on both enemies
 def plot_fitness(ea1_folder, ea2_folder):
     enemies = ['257', '367']  # two training groups
     fig, axs = plt.subplots(2, 1, figsize=(16, 24))
@@ -89,8 +92,9 @@ def plot_fitness(ea1_folder, ea2_folder):
         std_max_fitness_ea2 = [x / 2 for x in std_max_fitness_ea2]
         std_mean_fitness_ea2 = [x / 2 for x in std_mean_fitness_ea2]
 
+        # show only the relevant amount of generations
         if i == 0:
-            points = 12  # after that the ea has pretty much converged
+            points = 12
             generations = generations[:points]
             avg_max_fitness_ea1 = avg_max_fitness_ea1[:points]
             avg_mean_fitness_ea1 = avg_mean_fitness_ea1[:points]
@@ -171,17 +175,10 @@ def plot_fitness(ea1_folder, ea2_folder):
     plt.subplots_adjust(left=0.1, right=0.95, bottom=0.15)
 
     fig.suptitle('Mean and max fitness per generation for both EAs trained on both training groups across 10 runs.', fontsize=25)
-
-    # Save the plot
     plt.show()
 
-    output_folder = "plots/EA1_vs_EA2/all_enemies"
-    os.makedirs(output_folder, exist_ok=True)
-    plt.savefig(f"{output_folder}/fitness_statistics_all_enemies.png")
-    plt.close()
 
-
-# Function to plot the diversity statistics for Enemy 2
+# Function to plot the diversity statistics for one enemy group
 def plot_diversity(ea1_folder, ea2_folder):
     enemy = '367'
     fig, ax = plt.subplots(1, 1, figsize=(16, 8))  # Create a figure with 1 row and 1 column
@@ -222,9 +219,7 @@ def plot_diversity(ea1_folder, ea2_folder):
 
     # Adjust the layout to increase padding
     plt.tight_layout(pad=4.0)
-
     plt.subplots_adjust(left=0.1, right=0.95, top=0.9, bottom=0.1)
-
     plt.show()
 
     # Save the plot
@@ -247,7 +242,7 @@ def boxplots():
     for ea_name in ['EA1', 'EA2']:
         for enemy in ['257', '367']:
             # Load the best solutions for the current EA and enemy
-            best_solutions = list(load_best_solutions(ea_name, [int(el) for el in enemy]))
+            best_solutions = list(load_best_plot_solutions(ea_name, [int(el) for el in enemy]))
 
             # Extract the individual gains from the best solutions and store them
             gains = [solution[0] for solution in best_solutions]
@@ -258,11 +253,12 @@ def boxplots():
 
     # Plot the boxplots for each combination of EA and enemy
     ax.boxplot(all_gains, labels=labels)
-    ax.set_title('Individual gain boxplots of 10 runs for both EAs trained on both enemy groups', fontsize=25)
+    ax.set_title('Individual gain boxplots of 10 runs for both EAs trained on both enemy groups',
+                 fontsize=25)
 
     # Set ylabel and adjust its position slightly to the left
-    ylabel = ax.set_ylabel('Individual gain', fontsize=20, labelpad=0)  # Reduce labelpad to remove extra space
-    ylabel.set_position((-0.2, 0.5))  # Adjust position to move it slightly left
+    ylabel = ax.set_ylabel('Individual gain', fontsize=20, labelpad=0)
+    ylabel.set_position((-0.2, 0.5))
 
     ax.tick_params(axis='both', which='major', labelsize=15)
 
@@ -275,46 +271,66 @@ def boxplots():
     # Display the plot
     plt.show()
 
+
+# performs a t-test on the individual gains of all 4 EA setups and prints the results
+# of these tests.
 def statistical_test():
+    # List of enemies
     enemies = ['257', '367']
-    gains_ea1 = {enemy: [] for enemy in ['257', '367']}
-    gains_ea2 = {enemy: [] for enemy in ['257', '367']}
-    for enemy in ['257', '367']:
+
+    # Initialize dictionaries to store EA1 and EA2 gains for each enemy
+    gains_ea1 = {enemy: [] for enemy in enemies}
+    gains_ea2 = {enemy: [] for enemy in enemies}
+
+    # Load the gains for both EA1 and EA2 for each enemy
+    for enemy in enemies:
         for ea_name in [ea1, ea2]:
-            best_solutions = list(load_best_solutions(ea_name, [int(el) for el in enemy]))
+            best_solutions = list(load_best_plot_solutions(ea_name, [int(el) for el in enemy]))
             gains = [solution[0] for solution in best_solutions]
             if ea_name == ea1:
                 gains_ea1[enemy] = gains
             else:
                 gains_ea2[enemy] = gains
 
+    # Prepare a list to store the results
     results = []
 
-    for enemy in enemies:
-        # Gather data for each enemy
-        data_ea1 = gains_ea1[enemy]
-        data_ea2 = gains_ea2[enemy]
+    # Get all combinations of enemies and EA setups for pairwise comparison
+    setups = ['ea1', 'ea2']
+    for (enemy1, enemy2), (setup1, setup2) in product(product(enemies, repeat=2), product(setups, repeat=2)):
+        if enemy1 == enemy2 and setup1 == setup2:
+            # Skip comparisons of the same setup with itself
+            continue
 
-        # Perform t-test
-        t_stat, p_value = stats.ttest_ind(data_ea1, data_ea2)
+        # Get the appropriate data for the given enemy and setup combination
+        data_setup1 = gains_ea1[enemy1] if setup1 == 'ea1' else gains_ea2[enemy1]
+        data_setup2 = gains_ea1[enemy2] if setup2 == 'ea1' else gains_ea2[enemy2]
 
-        # Calculate means and 95% confidence intervals
-        mean_ea1 = np.mean(data_ea1)
-        mean_ea2 = np.mean(data_ea2)
+        # Perform the t-test between the two setups
+        t_stat, p_value = stats.ttest_ind(data_setup1, data_setup2)
 
-        ci_ea1 = stats.t.interval(0.95, len(data_ea1)-1, loc=mean_ea1, scale=stats.sem(data_ea1))
-        ci_ea2 = stats.t.interval(0.95, len(data_ea2)-1, loc=mean_ea2, scale=stats.sem(data_ea2))
+        # Calculate means and 95% confidence intervals for both setups
+        mean_setup1 = np.mean(data_setup1)
+        mean_setup2 = np.mean(data_setup2)
 
+        ci_setup1 = stats.t.interval(0.95, len(data_setup1)-1, loc=mean_setup1, scale=stats.sem(data_setup1))
+        ci_setup2 = stats.t.interval(0.95, len(data_setup2)-1, loc=mean_setup2, scale=stats.sem(data_setup2))
+
+        # Append the results for this comparison
         results.append({
-            'enemy': enemy,
+            'enemy1': enemy1,
+            'setup1': setup1,
+            'enemy2': enemy2,
+            'setup2': setup2,
             't_stat': t_stat,
             'p_value': p_value,
-            'mean_ea1': mean_ea1,
-            'mean_ea2': mean_ea2,
-            'ci_ea1': ci_ea1,
-            'ci_ea2': ci_ea2
+            'mean_setup1': mean_setup1,
+            'mean_setup2': mean_setup2,
+            'ci_setup1': ci_setup1,
+            'ci_setup2': ci_setup2
         })
 
+    # Convert results to a DataFrame and print it
     results_df = pd.DataFrame(results)
     print(results_df)
 
@@ -327,8 +343,8 @@ def main():
 
     # plot_fitness(ea1_folder, ea2_folder)
     # plot_diversity(ea1_folder, ea2_folder)
-    boxplots()
-    # statistical_test()
+    # boxplots()
+    statistical_test()
 
 
 if __name__ == '__main__':

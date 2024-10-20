@@ -1,14 +1,16 @@
 """
 Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
 
-Description: This file implements the fitness sharing evolutionary algorithm.
-This is a modified version of the EA1 algorithm that includes fitness sharing
-to encourage diversity in the population. The EA1 algorithm is modified to
-include a sharing function that calculates the portion of fitness that one
-should get based on the distance between the individuals. This sharing function
-is then applied directly into the fitness to encourage diversity in the
-population. The EA1 algorithm is then run with the fitness sharing mechanism
-to compare the results with the standard EA1 algorithm.
+Description: This file implements the tuning mechanism for the evolutionary
+algorithm. Specifically, it tunes the hyperparameters of the EA1 (fitness-based)
+algorithm using Optuna. The objective function is the fitness of the best
+individual found by the EA1 algorithm. The hyperparameters to be tuned are the
+population size, crossover rate, mutation rate, mutation standard deviation,
+blend crossover alpha, tournament size, and number of generations. The search
+space for each hyperparameter is defined in the `objective` function. The
+`run_optuna_study` function executes the Optuna study with a specified number of
+trials. The best hyperparameter configuration and fitness are printed at the end
+of the study.
 """
 
 # imports framework
@@ -226,7 +228,7 @@ class EA:
 
             print("Best solution and fitness statistics saved.")
 
-            
+
 # checks at all the currnet runs and returns the remaining runs in a list, per
 # run of a combination we add that combination to the list
 def get_remaining_runs(folder_path, NUMBER_OF_RUNS):
@@ -377,7 +379,7 @@ class HyperparameterTuner:
         # Run EA for each configuration
         for config in configurations:
             print(f"Testing configuration: {config}")
-            
+
             # Create the EA instance with the current hyperparameter configuration
             ea = EA(
                 population_size=config["population_size"],
@@ -407,7 +409,7 @@ class HyperparameterTuner:
         print(best_config)
         print(f"Best fitness achieved: {best_fitness}")
 
-        
+
 def objective(trial):
     # Define the search space for hyperparameters
     population_size = trial.suggest_int('population_size', 50, 200, step=2)  # Range of population size
@@ -447,7 +449,7 @@ def objective(trial):
         alpha=alpha,
         env=env,
         no_generations=no_generations,
-        # enemies=[3,6,7] 
+        # enemies=[3,6,7]
         enemies=[2,5,7]
     )
 # [3,6,7] , [2,5,7]
@@ -459,7 +461,7 @@ def objective(trial):
     # return ea.best_solution_fitness  # Return the best fitness as the objective value
     fitness_population = ea.evaluate_population()
     max_fitness = np.max(fitness_population)
-    
+
     return max_fitness
 
 
@@ -467,12 +469,12 @@ def objective(trial):
 def run_optuna_study(n_trials=2):
     study_name = "optuna_fitness_max_257"
     storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
-    
+
     # Create or load an existing study from the SQLite database
     study = optuna.create_study(study_name=study_name, direction="maximize", storage=storage_name, load_if_exists=True)
-    
+
     study.optimize(objective, n_trials=n_trials)
-    
+
     print("Study results saved to SQLite database.")
 
 if __name__ == "__main__":
