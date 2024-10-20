@@ -15,16 +15,12 @@ of the study.
 
 # imports framework
 import optuna
-import time
-import csv
 from evoman.environment import Environment
 from demo_controller import player_controller
 
 # imports other libs
 import numpy as np
 import os
-import itertools
-from collections import Counter
 
 # file utils
 from file_utils import save_best_solution, save_fitness_stats_to_csv
@@ -210,8 +206,8 @@ class EA:
 
                 # Store fitness statistics and diversity for this generation
                 self.store_fitness_stats(generation + 1, generation_max_fitness,
-                                        generation_mean_fitness, generation_std_fitness,
-                                        generation_variety)
+                                         generation_mean_fitness, generation_std_fitness,
+                                         generation_variety)
 
                 # Log the best fitness for monitoring
                 if generation_max_fitness > self.best_solution_fitness:
@@ -219,10 +215,10 @@ class EA:
                     self.best_solution_fitness = generation_max_fitness
 
                 print(f"{generation + 1}/{self.no_generations}, "
-                    f"max: {round(generation_max_fitness, 1)}, "
-                    f"mean: {round(generation_mean_fitness, 1)}, "
-                    f"std: {round(generation_std_fitness, 1)}, "
-                    f"diversity: {round(generation_variety, 1)}")
+                      f"max: {round(generation_max_fitness, 1)}, "
+                      f"mean: {round(generation_mean_fitness, 1)}, "
+                      f"std: {round(generation_std_fitness, 1)}, "
+                      f"diversity: {round(generation_variety, 1)}")
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -328,7 +324,6 @@ def objective(trial):
                         speed="fastest",
                         visuals=False)
 
-
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
     # Initialize the EA object with the sampled hyperparameters
@@ -345,9 +340,7 @@ def objective(trial):
         env=env,
         no_generations=no_generations,
         # enemies=[3,6,7]
-        enemies=[2,5,7]
-    )
-# [3,6,7] , [2,5,7]
+        enemies=[2, 5, 7])
 
     # Run the evolutionary algorithm and get the best fitness
     ea.run()
@@ -362,7 +355,7 @@ def objective(trial):
 
 # Function to execute the study
 def run_optuna_study(n_trials=2):
-    ### CHANGE STUDY NAME
+    # CHANGE STUDY NAME
     study_name = "optuna_age_max_257"
     storage_name = f"sqlite:///{study_name}.db"  # Use SQLite storage
 
@@ -373,34 +366,6 @@ def run_optuna_study(n_trials=2):
 
     print("Study results saved to SQLite database.")
 
+
 if __name__ == "__main__":
     run_optuna_study(n_trials=250)  # Set the number of trials (iterations)
-
-    # env = CustomEnvironment(experiment_name=experiment_name,
-    #                         enemies=[1],
-    #                         multiplemode="yes",
-    #                         playermode="ai",
-    #                         player_controller=player_controller(n_hidden_neurons),
-    #                         enemymode="static",
-    #                         level=2,
-    #                         speed="fastest",
-    #                         visuals=False)
-
-    # enemy_groups = [[1, 2, 5], [7, 8]]
-
-    # for enemies in enemy_groups:
-    #     for run in range(2):
-    #         print(f"Running EA with enemies {enemies}, run {run + 1}")
-    #         # Initialize the EA object
-    #         ea = EA(population_size=population_size,
-    #                 n_vars=n_vars,
-    #                 upper_bound=upper_bound,
-    #                 lower_bound=lower_bound,
-    #                 crossover_rate=crossover_rate,
-    #                 mutation_rate=mutation_rate,
-    #                 mutation_std=mutation_std,
-    #                 tournament_size=tournament_size,
-    #                 alpha=alpha,
-    #                 env=env,
-    #                 no_generations=no_generations,
-    #                 enemies=enemies

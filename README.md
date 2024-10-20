@@ -22,10 +22,9 @@ Files:
       NOTE: this will take about an hour to run.
 
 
-  - crowding.py:
-      Contains the implementation of 'EA2' which makes use of crowding, a
-      crossover technique to preserve diversity.
-      Running this file can be done using:
+  - age_based.py:
+      Contains the implementation of 'EA2' which makes use of age based
+      generation replacement. Running this file can be done using:
 
       'python3/python crowding.py'
 
@@ -33,20 +32,37 @@ Files:
       NOTE: this will take about an hour to run.
 
   - plot.py:
-      Contains the implementation to plot the data from the csv files in the
-      'final_data' folder. Running this file can be done using:
+      Contains the implementation to plot the data for the fitness across the
+      generations. It also plots the diversity and the individual gain for all
+      the best solutions in a box plots and lastly shows the statistical test
+      for the results of the different setups.
+      l Running this file can be done using:
 
       'python3/python plot.py'
 
-      This generates the plots and stores them in the 'plots' folder.
+      This generates and shows the plots.
 
   - run_best_solutions.py:
-      Contains the implementation to run the best solutions for both EAs against
-      the three different enemies. It also generates the boxplots for these runs.
-      Running this file can be done using:
+      Contains the implementation to load any of the best solutions and run them
+      in the environment to see how they perform. Running this file can be done:
 
       'python3/python run_best_solutions.py'
 
-      This generates the boxplot and stores the it in the plots folder. It also
-      prints the results of the statistical tests in the terminal to see if the
-      two EAs significantly differ from one another.
+  - get_best_individuals.py:
+      Contains the implementation to load the best solutions and get the best
+      individual from each of the runs. It does so by looking at all the best
+      solutions for a given setup and extracts the 10 best individuals from all
+      the runs. Used to get the boxplot data.
+      Running this file can be done using:
+
+      'python3/python get_best_individuals.py'
+
+  - #.db:
+      the optuna databases for the different setups. These are used to store the
+      results of the hyperparameter optimization for the different setups.
+
+  - parameter_plots.py:
+      Contains the implementation to plot the results of the hyperparameter
+      optimization. Running this file can be done using:
+
+      'python3/python parameter_plots.py'

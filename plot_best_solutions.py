@@ -1,7 +1,13 @@
 """
 Authors: Lucas Keijzer, Pjotr Piet, Max Scot, Marina Steinkuhle
 
-
+Description: This script is used to show the best solutions found by the EA1
+and EA2 algorithms for each enemy group. It does so by loading the best
+solutions from the final_best_solutions.csv file and printing them in a table.
+The table shows the enemy group, the mean and standard deviation of the gains,
+the maximum gain, the mean and standard deviation of the number of enemies beaten,
+and the maximum number of enemies beaten. The table also shows the enemies beaten
+by the best solution found for each enemy group.
 """
 
 

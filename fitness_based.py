@@ -117,12 +117,14 @@ class EA:
 
         return self.clamp(offspring)
 
+    # mutates an individual by adding Gaussian noise to each gene
     def mutate_individual(self, individual):
         for i in range(len(individual)):
             individual[i] += np.random.normal(0, self.mutation_std)
 
         return self.clamp(individual)
 
+    # evaluates the fitness of the population
     def evaluate_population(self):
         return np.array([self.simulation(individual) for individual in self.population])
 
@@ -294,18 +296,28 @@ def main():
 
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
-    # EA configuration
-    population_size = 100
-    no_generations = 30
     upper_bound = 1
     lower_bound = -1
-    crossover_rate = 0.9
-    alpha = 0.5
-    mutation_rate = 0.20
-    mutation_std = 0.45
-    tournament_size = 7
 
-    enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
+    # 257
+    population_size = 125
+    no_generations = 30
+    crossover_rate = 0.8
+    alpha = 0.5
+    mutation_rate = 0.91
+    mutation_std = 0.5
+    tournament_size = 8
+
+    # 367
+    population_size = 200
+    no_generations = 30
+    crossover_rate = 0.74
+    alpha = 0.15
+    mutation_rate = 0.1
+    mutation_std = 0.43
+    tournament_size = 10
+
+    enemy_groups = [[2, 5, 7], [3, 6, 7]]
 
     for enemies in enemy_groups:
         for run in range(10):  # the amount of runs are represented by repeating an enemy combination

@@ -316,23 +316,8 @@ def main():
 
     enemy_groups = [[2, 5, 7], [3, 6, 7]]
 
-    NUMBER_OF_RUNS = 10
-    remaining_runs = get_remaining_runs(f'testdata/{EA_NAME}/', NUMBER_OF_RUNS)
-
-    # Calculate the number of combinations in each of the 6 parts
-    part_size = len(remaining_runs) // 6
-
-    # Divide the entire population into 6 parts
-    enemy_groups = remaining_runs[:part_size]
-    enemy_groups = remaining_runs[part_size:2 * part_size]
-    enemy_groups = remaining_runs[2 * part_size:3 * part_size]
-    enemy_groups = remaining_runs[3 * part_size:4 * part_size]
-    enemy_groups = remaining_runs[4 * part_size:5 * part_size]
-    enemy_groups = remaining_runs[5 * part_size:]
-
-
     for enemies in enemy_groups:
-        for run in range(1):  # the amount of runs are represented by repeating an enemy combination
+        for run in range(10):  # the amount of runs are represented by repeating an enemy combination
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,
