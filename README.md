@@ -12,6 +12,14 @@ Folders:
       been done per enemy group, which means 2 * 10 * 2 = 40 runs/files.
 
 Files:
+  - run_best_solutions.py:
+      Contains the implementation to load any of the best solutions and run them
+      in the environment to see how they perform. Visuals and data included if
+      you're interested ;). Running this file can be done:
+
+      'python3/python run_best_solutions.py'
+
+
   - fitness_based.py:
       Contains the implementation of 'EA1' which makes use of fitness based
       generation replacement. Running this file can be done using:
@@ -41,12 +49,6 @@ Files:
       'python3/python plot.py'
 
       This generates and shows the plots.
-
-  - run_best_solutions.py:
-      Contains the implementation to load any of the best solutions and run them
-      in the environment to see how they perform. Running this file can be done:
-
-      'python3/python run_best_solutions.py'
 
   - get_best_individuals.py:
       Contains the implementation to load the best solutions and get the best

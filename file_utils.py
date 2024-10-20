@@ -91,7 +91,7 @@ def save_final_best_solution(weights, individual_gain, number_of_enemies_beaten,
 
 # loads one specific final best solution from the given enemies group and ea_name
 # and filename
-def load_final_best_solution(enemies_name, ea_name, filename):
+def load_final_best_solution( ea_name, enemies_name, filename):
     directory = f"final_best_solutions/{ea_name}/{enemies_name}/"
 
     path = directory + filename

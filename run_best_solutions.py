@@ -104,63 +104,43 @@ def main():
     # enemies_folder = ''.join([str(enemy) for enemy in trained_enemies])
     all_enemies = range(1, 9) # List of enemies to test agianst
 
-    enemy_groups = [[3, 6, 7]]
     enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
+    enemy_groups = [[3, 6, 7]]
 
-    # goated agents:EA2:
-    # 125 4,8,9
-    # 126 0,
-    # 138 5,6
-    # 145 5,
-    # 234 1,6
-    # 247 2(5!),3(5!),9
-    # 248 0,5,6,7,9
-    # 256 2,3,4(5!),9
-    # 257 4(5!+180),7,8,
-    # 378 5,7,9
-    # 457 2,8,9
-    # 458 -(miss 7 toevoegen voor generalisatie)
+    gainss = []
+    for enemy in enemy_groups:
+        enemies_folder = ''.join([str(enemy) for enemy in enemy])
+        gains = []
+        lives = []
+        for enemy in all_enemies:
 
+            ea = 'EA1'
+            file_name = 'best_defeated.txt'
+            # Load the weights from the file
 
-    # for ea in ['EA1', 'EA2']:
-    for ea in ['EA1']:
-        gainss = []
-        for enemy in enemy_groups:
-            enemies_folder = ''.join([str(enemy) for enemy in enemy])
-            gains = []
-            lives = []
-            for enemy in all_enemies:
+            _, _, _, weights = load_final_best_solution(ea, enemies_folder, file_name)
+            weights = np.array(weights)
 
-                # Load the weights from the file
-                folder_path = f'{folder_name}/{ea}/{enemies_folder}'
-                file_name = '
-                file_path = os.path.join(folder_path, file_name)
+            # Initializes environment for single objective mode (specialist) with static enemy and AI player
+            env = Environment(experiment_name=experiment_name,
+                            playermode="ai",
+                            enemies=[enemy],
+                            player_controller=player_controller(n_hidden_neurons),
+                            speed="normal",
+                            enemymode="static",
+                            level=2,
+                            visuals=True)
 
-                # weights = np.loadtxt(file_path)
-                #
+            # Play and get the results
+            fitness, player_life, enemy_life, _ = env.play(weights)
 
-                weights = np.array(weights)
+            # Calculate gain for this enemy
+            gain = player_life - enemy_life
+            gains.append(gain)
+            lives.append((player_life, enemy_life))
 
-                # Initializes environment for single objective mode (specialist) with static enemy and AI player
-                env = Environment(experiment_name=experiment_name,
-                                playermode="ai",
-                                enemies=[enemy],
-                                player_controller=player_controller(n_hidden_neurons),
-                                speed="fastest",
-                                enemymode="static",
-                                level=2,
-                                visuals=False)
-
-                # Play and get the results
-                fitness, player_life, enemy_life, _ = env.play(weights)
-
-                # Calculate gain for this enemy
-                gain = player_life - enemy_life
-                gains.append(gain)
-                lives.append((player_life, enemy_life))
-
-                print(f"EA {ea}, Enemy {enemy}, Player Life: {player_life}, Enemy Life: {enemy_life}, Gain: {gain}")
-            gainss.append(gains)
+            print(f"EA {ea}, Enemy {enemy}, Player Life: {player_life}, Enemy Life: {enemy_life}, Gain: {gain}")
+        gainss.append(gains)
 
     for i, gains in enumerate(gainss):
         print(i + 1)
