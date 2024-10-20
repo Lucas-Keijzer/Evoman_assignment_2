@@ -83,6 +83,24 @@ def save_final_best_solution(weights, individual_gain, number_of_enemies_beaten,
     np.savetxt(filename, to_save, fmt='%.18e')
 
 
+# loads one specific final best solution from the given enemies group and ea_name
+# and filename
+def load_final_best_solution(enemies_name, ea_name, filename):
+    directory = f"final_best_solutions/{ea_name}/{enemies_name}/"
+
+    path = directory + filename
+    if os.path.exists(path):
+        data = np.loadtxt(path)
+        individual_gain = data[0]
+        number_of_enemies_beaten = data[1]
+        enemies_beaten = data[2:10]
+        weights = data[10:]
+        return individual_gain, number_of_enemies_beaten, enemies_beaten, weights
+    else:
+        print(f"File {path} not found.")
+        return None, None, None, None
+
+
 # loads the 10 best solution from the given enemies group and ea_name
 def load_best_solutions(ea_name, enemies):
     enemies_name = ''.join(str(e) for e in enemies)

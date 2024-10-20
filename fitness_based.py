@@ -200,6 +200,8 @@ class EA:
                 self.store_fitness_stats(generation + 1, generation_max_fitness,
                                         generation_mean_fitness, generation_std_fitness,
                                         generation_variety)
+                if generation_variety < 0.01 and generation_std_fitness < 0.01:
+                    break
 
                 # Log the best fitness for monitoring
                 if generation_max_fitness > self.best_solution_fitness:
@@ -287,13 +289,13 @@ def main():
     n_vars = (env.get_num_sensors() + 1) * n_hidden_neurons + (n_hidden_neurons + 1) * 5
 
     # EA configuration
-    population_size = 80
+    population_size = 100
     no_generations = 30
     upper_bound = 1
     lower_bound = -1
     crossover_rate = 0.9
-    alpha = 0.75
-    mutation_rate = 0.22
+    alpha = 0.5
+    mutation_rate = 0.20
     mutation_std = 0.45
     tournament_size = 7
 
@@ -317,11 +319,11 @@ def main():
     # enemy_groups = remaining_runs[3 * part_size:4 * part_size]
     # enemy_groups = remaining_runs[4 * part_size:5 * part_size]
     # enemy_groups = remaining_runs[5 * part_size:]
-    enemy_groups = [[1,2]]
+    enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
 
 
     for enemies in enemy_groups:
-        for run in range(2):  # the amount of runs are represented by repeating an enemy combination
+        for run in range(9):  # the amount of runs are represented by repeating an enemy combination
             print(f"Running EA with enemies {enemies}, run {run + 1}")
             # Initialize the EA object
             ea = EA(population_size=population_size,

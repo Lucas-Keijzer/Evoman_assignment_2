@@ -19,6 +19,8 @@ from demo_controller import player_controller
 import scipy.stats as stats
 import pandas as pd
 
+from file_utils import load_final_best_solution
+
 experiment_name = 'boxplots'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
@@ -99,13 +101,11 @@ def statistical_test(gains_ea1, gains_ea2, enemies):
 
 
 def main():
-    trained_enemies = [2, 5, 8]
-
     # enemies_folder = ''.join([str(enemy) for enemy in trained_enemies])
     all_enemies = range(1, 9) # List of enemies to test agianst
 
-    enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
     enemy_groups = [[3, 6, 7]]
+    enemy_groups = [[1, 2, 3, 4, 5, 6, 7, 8]]
 
     # goated agents:EA2:
     # 125 4,8,9
@@ -133,10 +133,10 @@ def main():
 
                 # Load the weights from the file
                 folder_path = f'{folder_name}/{ea}/{enemies_folder}'
-                file_name = os.listdir(folder_path)[-1]
+                file_name = '
                 file_path = os.path.join(folder_path, file_name)
 
-                weights = np.loadtxt(file_path)
+                # weights = np.loadtxt(file_path)
                 #
 
                 weights = np.array(weights)
@@ -146,10 +146,10 @@ def main():
                                 playermode="ai",
                                 enemies=[enemy],
                                 player_controller=player_controller(n_hidden_neurons),
-                                speed="normal",
+                                speed="fastest",
                                 enemymode="static",
                                 level=2,
-                                visuals=True)
+                                visuals=False)
 
                 # Play and get the results
                 fitness, player_life, enemy_life, _ = env.play(weights)
@@ -162,10 +162,10 @@ def main():
                 print(f"EA {ea}, Enemy {enemy}, Player Life: {player_life}, Enemy Life: {enemy_life}, Gain: {gain}")
             gainss.append(gains)
 
-    print(gainss)
     for i, gains in enumerate(gainss):
-        print({i + 1})
-        print(gainss)
+        print(i + 1)
+        print('gains', gainss)
+        print('lives', lives)
         print(f'EA1 total gain agianst all enemies: = {sum(gains)}')
         print(f'EA1 beat enemies: {[(i + 1, pl) for i, (pl, el) in enumerate(lives) if el <=0]}')
 

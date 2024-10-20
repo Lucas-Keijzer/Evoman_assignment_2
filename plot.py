@@ -14,6 +14,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
+from file_utils import load_best_solutions
+import pandas as pd
+import scipy.stats as stats
+
 ea1 = 'EA1'
 ea2 = 'EA2'
 
@@ -66,82 +70,107 @@ def load_data(ea_folder, enemy_folder):
 
 # Function to plot the fitness statistics for multiple EAs
 def plot_fitness(ea1_folder, ea2_folder):
-    enemies = ['2', '5', '8']  # List of enemies
-    fig, axs = plt.subplots(3, 1, figsize=(16, 24))  # Create a figure with 3 rows and 1 column
+    enemies = ['257', '367']  # two training groups
+    fig, axs = plt.subplots(2, 1, figsize=(16, 24))
 
     for i, enemy in enumerate(enemies):
         generations, avg_max_fitness_ea1, avg_mean_fitness_ea1, std_max_fitness_ea1, std_mean_fitness_ea1, _, _ = load_data(ea1_folder, enemy)
         _, avg_max_fitness_ea2, avg_mean_fitness_ea2, std_max_fitness_ea2, std_mean_fitness_ea2, _, _ = load_data(ea2_folder, enemy)
 
+
+        # scale the values by 1/2 (since we changed the fitness function to be 0-200)
+        avg_max_fitness_ea1 = [x / 2 for x in avg_max_fitness_ea1]
+        avg_mean_fitness_ea1 = [x / 2 for x in avg_mean_fitness_ea1]
+        std_max_fitness_ea1 = [x / 2 for x in std_max_fitness_ea1]
+        std_mean_fitness_ea1 = [x / 2 for x in std_mean_fitness_ea1]
+
+        avg_max_fitness_ea2 = [x / 2 for x in avg_max_fitness_ea2]
+        avg_mean_fitness_ea2 = [x / 2 for x in avg_mean_fitness_ea2]
+        std_max_fitness_ea2 = [x / 2 for x in std_max_fitness_ea2]
+        std_mean_fitness_ea2 = [x / 2 for x in std_mean_fitness_ea2]
+
+        if i == 0:
+            points = 12  # after that the ea has pretty much converged
+            generations = generations[:points]
+            avg_max_fitness_ea1 = avg_max_fitness_ea1[:points]
+            avg_mean_fitness_ea1 = avg_mean_fitness_ea1[:points]
+            std_max_fitness_ea1 = std_max_fitness_ea1[:points]
+            std_mean_fitness_ea1 = std_mean_fitness_ea1[:points]
+
+            avg_max_fitness_ea2 = avg_max_fitness_ea2[:points]
+            avg_mean_fitness_ea2 = avg_mean_fitness_ea2[:points]
+            std_max_fitness_ea2 = std_max_fitness_ea2[:points]
+            std_mean_fitness_ea2 = std_mean_fitness_ea2[:points]
+        elif i == 1:
+            points = 20
+            generations = generations[:points]
+            avg_max_fitness_ea1 = avg_max_fitness_ea1[:points]
+            avg_mean_fitness_ea1 = avg_mean_fitness_ea1[:points]
+            std_max_fitness_ea1 = std_max_fitness_ea1[:points]
+            std_mean_fitness_ea1 = std_mean_fitness_ea1[:points]
+
+            avg_max_fitness_ea2 = avg_max_fitness_ea2[:points]
+            avg_mean_fitness_ea2 = avg_mean_fitness_ea2[:points]
+            std_max_fitness_ea2 = std_max_fitness_ea2[:points]
+            std_mean_fitness_ea2 = std_mean_fitness_ea2[:points]
+
+
         # Plot EA1
-        axs[i].plot(generations, avg_max_fitness_ea1, label=f'Avg Max Fitness EA1', color='red', linewidth=2)
-        axs[i].plot(generations, avg_mean_fitness_ea1, label=f'Avg Mean Fitness EA1', color='blue', linestyle='-', linewidth=2)
+        axs[i].plot(generations, avg_max_fitness_ea1, label=f'Avg Max Fitness EA1: fitness based',
+                    color='orangered', linewidth=2)
+        axs[i].plot(generations, avg_mean_fitness_ea1, label=f'Avg Mean Fitness EA1: fitness based'
+                    , color='red', linestyle='-', linewidth=2)
         axs[i].fill_between(generations,
                             np.array(avg_max_fitness_ea1) - np.array(std_max_fitness_ea1),
                             np.array(avg_max_fitness_ea1) + np.array(std_max_fitness_ea1),
-                            color='red', alpha=0.2)
+                            color='orangered', alpha=0.1)
 
         axs[i].fill_between(generations,
                             np.array(avg_mean_fitness_ea1) - np.array(std_mean_fitness_ea1),
                             np.array(avg_mean_fitness_ea1) + np.array(std_mean_fitness_ea1),
-                            color='blue', alpha=0.2)
+                            color='red', alpha=0.1)
 
         # Plot EA2
-        axs[i].plot(generations, avg_max_fitness_ea2, label=f'Avg Max Fitness EA2', color='orange', linewidth=2)
-        axs[i].plot(generations, avg_mean_fitness_ea2, label=f'Avg Mean Fitness EA2', color='purple', linestyle='-', linewidth=2)
+        axs[i].plot(generations, avg_max_fitness_ea2, label=f'Avg Max Fitness EA2: age based',
+                    color='cornflowerblue', linewidth=2)
+        axs[i].plot(generations, avg_mean_fitness_ea2, label=f'Avg Mean Fitness EA2: age based',
+                    color='blue', linestyle='-', linewidth=2)
         axs[i].fill_between(generations,
                             np.array(avg_max_fitness_ea2) - np.array(std_max_fitness_ea2),
                             np.array(avg_max_fitness_ea2) + np.array(std_max_fitness_ea2),
-                            color='orange', alpha=0.2)
+                            color='cornflowerblue', alpha=0.1)
 
         axs[i].fill_between(generations,
                             np.array(avg_mean_fitness_ea2) - np.array(std_mean_fitness_ea2),
                             np.array(avg_mean_fitness_ea2) + np.array(std_mean_fitness_ea2),
-                            color='purple', alpha=0.2)
+                            color='blue', alpha=0.1)
 
+        group = ', '.join(enemy)
         # Set titles for each subplot
-        axs[i].set_title(f'Fitness statistics for enemy {enemy}', fontsize=20)  # Decreased title size
+        axs[i].set_title(f'EAs trained on enemies {group}', fontsize=22)  # Decreased title size
         axs[i].grid(True)
 
         # Set font size for both axes
-        axs[i].tick_params(axis='both', which='major', labelsize=12)
+        axs[i].tick_params(axis='both', which='major', labelsize=15)
 
-        # Create an inset for the zoomed-in view
-        axins = inset_axes(axs[i], width="30%", height="30%", loc='lower right', borderpad=2)  # borderpad adjusts the inset's padding
-        axins.plot(generations, avg_max_fitness_ea1, color='red', linewidth=2)
-        axins.plot(generations, avg_mean_fitness_ea1, color='blue', linestyle='--', linewidth=2)
-        axins.plot(generations, avg_max_fitness_ea2, color='orange', linewidth=2)
-        axins.plot(generations, avg_mean_fitness_ea2, color='purple', linestyle='--', linewidth=2)
-
-        # Set the limits for the zoomed-in view
-        axins.set_ylim(88, 95)
-        axins.set_xlim(min(generations), max(generations))
-
-        # Remove x and y ticks and labels on the inset
-        axins.set_xticks([])
-        axins.set_yticks([])
-
-        # Add grid to the inset
-        axins.grid(True)
-
-    # Set a single ylabel for all subplots
-    axs[1].set_ylabel('Fitness', fontsize=20)  # Decreased font size for ylabel
+    # Positioning the shared ylabel
+    fig.text(0.04, 0.45, 'Fitness', fontsize=20, va='center', rotation='vertical')
 
     # Centralize the x-label for the entire figure
-    fig.text(0.5, 0.01, 'Generation', ha='center', fontsize=20)  # Decreased font size for xlabel
+    fig.text(0.5, 0.05, 'Generation', ha='center', fontsize=25)  # Decreased font size for xlabel
 
     # Set a common legend in a clear spot on the figure
     handles, labels = axs[0].get_legend_handles_labels()  # Get legend handles from the first subplot
-    fig.legend(handles, labels, loc='upper center', fontsize=14, bbox_to_anchor=(0.5, 0.94), ncol=2)
+    fig.legend(handles, labels, loc='upper center', fontsize=16, bbox_to_anchor=(0.5, 0.94), ncol=2)
 
     # Adjust the layout to increase padding between plots
-    plt.tight_layout(pad=10.0)  # Increased padding between subplots for clarity
+    plt.tight_layout(pad=15.0)
     plt.subplots_adjust(top=0.80)
 
     # adjust left and right padding
-    plt.subplots_adjust(left=0.1, right=0.95)
+    plt.subplots_adjust(left=0.1, right=0.95, bottom=0.15)
 
-    fig.suptitle('Fitness comparison between EA1 and EA2 over 10 runs per enemy', fontsize=16)
+    fig.suptitle('Mean and max fitness per generation for both EAs trained on both training groups across 10 runs.', fontsize=25)
 
     # Save the plot
     plt.show()
@@ -151,9 +180,10 @@ def plot_fitness(ea1_folder, ea2_folder):
     plt.savefig(f"{output_folder}/fitness_statistics_all_enemies.png")
     plt.close()
 
+
 # Function to plot the diversity statistics for Enemy 2
 def plot_diversity(ea1_folder, ea2_folder):
-    enemy = '2'  # Only plot for Enemy 2
+    enemy = '367'
     fig, ax = plt.subplots(1, 1, figsize=(16, 8))  # Create a figure with 1 row and 1 column
 
     # Load data for Enemy 2
@@ -168,19 +198,22 @@ def plot_diversity(ea1_folder, ea2_folder):
                     color='green', alpha=0.2)
 
     # Plot EA2
-    ax.plot(generations, avg_diversity_ea2, label=f'Avg Diversity EA2', color='cyan', linewidth=2)
+    ax.plot(generations, avg_diversity_ea2, label=f'Avg Diversity EA2', color='darkturquoise', linewidth=2)
     ax.fill_between(generations,
                     np.array(avg_diversity_ea2) - np.array(std_diversity_ea2),
                     np.array(avg_diversity_ea2) + np.array(std_diversity_ea2),
-                    color='cyan', alpha=0.2)
+                    color='darkturquoise', alpha=0.2)
+
+    # add comma between each enemy
+    group = ', '.join(enemy)
 
     # Set title for the plot
-    ax.set_title(f'Diversity Statistics for enemy {enemy}', fontsize=24)
+    ax.set_title(f'Diversity statistics per generation for both EAs trained on enemies {group} across 10 runs', fontsize=25)
 
     # Set labels and grid
-    ax.set_ylabel('Diversity (average euclidean distance)', fontsize=16)
-    ax.set_xlabel('Generation', fontsize=16)
-    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.set_ylabel('Diversity (average euclidean distance)', fontsize=20, labelpad=20)
+    ax.set_xlabel('Generation', fontsize=20)
+    ax.tick_params(axis='both', which='major', labelsize=15)
     ax.grid(True)
 
     # Set a common legend in the top right
@@ -201,6 +234,90 @@ def plot_diversity(ea1_folder, ea2_folder):
     plt.close()
 
 
+# plots the 4 boxplots of both EAs on both enemies from the final_best_solutions folder
+# it creates the boxplots for the total gain value of both agents for both enemies
+def boxplots():
+    fig, ax = plt.subplots(figsize=(10, 6))  # Create a single figure for all 4 boxplots
+
+    # Initialize a list to store gains for plotting and their labels
+    all_gains = []
+    labels = []
+
+    # Loop over both 'EA1' and 'EA2' and both enemies to load gains
+    for ea_name in ['EA1', 'EA2']:
+        for enemy in ['257', '367']:
+            # Load the best solutions for the current EA and enemy
+            best_solutions = list(load_best_solutions(ea_name, [int(el) for el in enemy]))
+
+            # Extract the individual gains from the best solutions and store them
+            gains = [solution[0] for solution in best_solutions]
+            all_gains.append(gains)
+
+            # Add the label for this boxplot
+            labels.append(f'{ea_name}, Enemy {enemy}')
+
+    # Plot the boxplots for each combination of EA and enemy
+    ax.boxplot(all_gains, labels=labels)
+    ax.set_title('Individual gain boxplots of 10 runs for both EAs trained on both enemy groups', fontsize=25)
+
+    # Set ylabel and adjust its position slightly to the left
+    ylabel = ax.set_ylabel('Individual gain', fontsize=20, labelpad=0)  # Reduce labelpad to remove extra space
+    ylabel.set_position((-0.2, 0.5))  # Adjust position to move it slightly left
+
+    ax.tick_params(axis='both', which='major', labelsize=15)
+
+    # Manually adjust the axes position for tighter control
+    ax.set_position([0.2, 0.2, 0.6, 0.6])  # [left, bottom, width, height]
+
+    # Optionally adjust the subplot parameters to minimize space
+    plt.tight_layout(pad=3.0)  # You can adjust this padding
+
+    # Display the plot
+    plt.show()
+
+def statistical_test():
+    enemies = ['257', '367']
+    gains_ea1 = {enemy: [] for enemy in ['257', '367']}
+    gains_ea2 = {enemy: [] for enemy in ['257', '367']}
+    for enemy in ['257', '367']:
+        for ea_name in [ea1, ea2]:
+            best_solutions = list(load_best_solutions(ea_name, [int(el) for el in enemy]))
+            gains = [solution[0] for solution in best_solutions]
+            if ea_name == ea1:
+                gains_ea1[enemy] = gains
+            else:
+                gains_ea2[enemy] = gains
+
+    results = []
+
+    for enemy in enemies:
+        # Gather data for each enemy
+        data_ea1 = gains_ea1[enemy]
+        data_ea2 = gains_ea2[enemy]
+
+        # Perform t-test
+        t_stat, p_value = stats.ttest_ind(data_ea1, data_ea2)
+
+        # Calculate means and 95% confidence intervals
+        mean_ea1 = np.mean(data_ea1)
+        mean_ea2 = np.mean(data_ea2)
+
+        ci_ea1 = stats.t.interval(0.95, len(data_ea1)-1, loc=mean_ea1, scale=stats.sem(data_ea1))
+        ci_ea2 = stats.t.interval(0.95, len(data_ea2)-1, loc=mean_ea2, scale=stats.sem(data_ea2))
+
+        results.append({
+            'enemy': enemy,
+            't_stat': t_stat,
+            'p_value': p_value,
+            'mean_ea1': mean_ea1,
+            'mean_ea2': mean_ea2,
+            'ci_ea1': ci_ea1,
+            'ci_ea2': ci_ea2
+        })
+
+    results_df = pd.DataFrame(results)
+    print(results_df)
+
 
 def main():
     base_data_folder = 'final_data'
@@ -208,8 +325,10 @@ def main():
     ea1_folder = os.path.join(base_data_folder, ea1)
     ea2_folder = os.path.join(base_data_folder, ea2)
 
-    plot_fitness(ea1_folder, ea2_folder)
-    plot_diversity(ea1_folder, ea2_folder)
+    # plot_fitness(ea1_folder, ea2_folder)
+    # plot_diversity(ea1_folder, ea2_folder)
+    boxplots()
+    # statistical_test()
 
 
 if __name__ == '__main__':
